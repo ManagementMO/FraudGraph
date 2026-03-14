@@ -1,6 +1,7 @@
-"""Unit tests for all 4 worker fraud detection agents."""
+"""Unit tests for all 5 fraud detection agents (4 workers + coordinator)."""
 import pytest
 import numpy as np
+from backend.models.schemas import AgentAssessment
 
 
 # ---------------------------------------------------------------------------
@@ -503,3 +504,180 @@ class TestBehavioralAgent:
         })
         assert any("thin" in s.lower() or "low-history" in s.lower() or "prior txn" in s.lower()
                     for s in result.signals), f"Expected thin-history signal, got: {result.signals}"
+
+
+# ---------------------------------------------------------------------------
+# Coordinator Agent fixtures & tests
+# ---------------------------------------------------------------------------
+
+def make_assessment(name, score, confidence, signals):
+    """Helper to create AgentAssessment objects for coordinator tests."""
+    return AgentAssessment(
+        agent_name=name, risk_score=score, confidence=confidence,
+        signals=signals, explanation=f"{name}: {'; '.join(signals)}"
+    )
+
+
+@pytest.fixture
+def sample_assessments():
+    """Standard set of 4 agent assessments for coordinator testing."""
+    return [
+        make_assessment("Velocity Agent", 80, 0.9, ["3 txns in 90 sec"]),
+        make_assessment("Geolocation Agent", 60, 0.8, ["Rapid location change"]),
+        make_assessment("Graph Agent", 70, 0.85, ["Shared device with fraud card"]),
+        make_assessment("Behavioral Agent", 40, 0.6, ["New category"]),
+    ]
+
+
+class TestCoordinatorAgent:
+    """Tests for CoordinatorAgent."""
+
+    def test_coordinator_weighted_scoring(self, sample_assessments):
+        """Given 4 assessments with known scores/confidences, final_score matches manual calculation."""
+        from backend.agents.coordinator_agent import CoordinatorAgent
+        coord = CoordinatorAgent(use_llm=False)
+        verdict = coord.synthesize("txn_test", sample_assessments)
+
+        # Manual calculation:
+        # Velocity:    80 * 0.25 * 0.9  = 18.0,  weight_contrib = 0.25 * 0.9  = 0.225
+        # Geolocation: 60 * 0.25 * 0.8  = 12.0,  weight_contrib = 0.25 * 0.8  = 0.200
+        # Graph:       70 * 0.30 * 0.85 = 17.85, weight_contrib = 0.30 * 0.85 = 0.255
+        # Behavioral:  40 * 0.20 * 0.6  = 4.8,   weight_contrib = 0.20 * 0.6  = 0.120
+        # Total weighted = 52.65, total_weight = 0.800
+        # final_score = 52.65 / 0.800 = 65.8125
+        expected = 65.8125
+        assert abs(verdict.final_score - expected) < 0.5, \
+            f"Expected ~{expected}, got {verdict.final_score}"
+
+    def test_coordinator_verdict_approve(self):
+        """final_score=25 -> verdict='APPROVE'."""
+        from backend.agents.coordinator_agent import CoordinatorAgent
+        coord = CoordinatorAgent(use_llm=False)
+        assessments = [
+            make_assessment("Velocity Agent", 25, 1.0, []),
+            make_assessment("Geolocation Agent", 25, 1.0, []),
+            make_assessment("Graph Agent", 25, 1.0, []),
+            make_assessment("Behavioral Agent", 25, 1.0, []),
+        ]
+        verdict = coord.synthesize("txn_low", assessments)
+        assert verdict.verdict == "APPROVE"
+        assert verdict.final_score < 30
+
+    def test_coordinator_verdict_flag(self):
+        """final_score ~50 -> verdict='FLAG'."""
+        from backend.agents.coordinator_agent import CoordinatorAgent
+        coord = CoordinatorAgent(use_llm=False)
+        assessments = [
+            make_assessment("Velocity Agent", 50, 1.0, ["Elevated amount"]),
+            make_assessment("Geolocation Agent", 50, 1.0, ["Address mismatch"]),
+            make_assessment("Graph Agent", 50, 1.0, ["Cross-community"]),
+            make_assessment("Behavioral Agent", 50, 1.0, ["New category"]),
+        ]
+        verdict = coord.synthesize("txn_mid", assessments)
+        assert verdict.verdict == "FLAG"
+        assert 30 <= verdict.final_score < 70
+
+    def test_coordinator_verdict_block(self):
+        """final_score ~80 -> verdict='BLOCK'."""
+        from backend.agents.coordinator_agent import CoordinatorAgent
+        coord = CoordinatorAgent(use_llm=False)
+        assessments = [
+            make_assessment("Velocity Agent", 80, 1.0, ["Rapid burst"]),
+            make_assessment("Geolocation Agent", 80, 1.0, ["Impossible travel"]),
+            make_assessment("Graph Agent", 80, 1.0, ["Fraud network"]),
+            make_assessment("Behavioral Agent", 80, 1.0, ["Major deviation"]),
+        ]
+        verdict = coord.synthesize("txn_high", assessments)
+        assert verdict.verdict == "BLOCK"
+        assert verdict.final_score >= 70
+
+    def test_coordinator_threshold_boundaries(self):
+        """Boundary tests: 29.9 -> APPROVE, 30.0 -> FLAG, 69.9 -> FLAG, 70.0 -> BLOCK."""
+        from backend.agents.coordinator_agent import CoordinatorAgent
+        coord = CoordinatorAgent(use_llm=False)
+
+        def make_uniform(score):
+            return [
+                make_assessment("Velocity Agent", score, 1.0, []),
+                make_assessment("Geolocation Agent", score, 1.0, []),
+                make_assessment("Graph Agent", score, 1.0, []),
+                make_assessment("Behavioral Agent", score, 1.0, []),
+            ]
+
+        v1 = coord.synthesize("t1", make_uniform(29.9))
+        assert v1.verdict == "APPROVE", f"29.9 should APPROVE, got {v1.verdict} (score={v1.final_score})"
+
+        v2 = coord.synthesize("t2", make_uniform(30.0))
+        assert v2.verdict == "FLAG", f"30.0 should FLAG, got {v2.verdict} (score={v2.final_score})"
+
+        v3 = coord.synthesize("t3", make_uniform(69.9))
+        assert v3.verdict == "FLAG", f"69.9 should FLAG, got {v3.verdict} (score={v3.final_score})"
+
+        v4 = coord.synthesize("t4", make_uniform(70.0))
+        assert v4.verdict == "BLOCK", f"70.0 should BLOCK, got {v4.verdict} (score={v4.final_score})"
+
+    def test_coordinator_rule_based_explanation(self):
+        """use_llm=False, high-risk assessments -> explanation contains score and top agent signals."""
+        from backend.agents.coordinator_agent import CoordinatorAgent
+        coord = CoordinatorAgent(use_llm=False)
+        assessments = [
+            make_assessment("Velocity Agent", 85, 0.9, ["3 txns in 90 sec"]),
+            make_assessment("Geolocation Agent", 70, 0.8, ["Impossible travel"]),
+            make_assessment("Graph Agent", 60, 0.7, ["Shared device"]),
+            make_assessment("Behavioral Agent", 20, 0.5, []),
+        ]
+        verdict = coord.synthesize("txn_explain", assessments)
+        explanation = verdict.explanation
+        # Should contain the score
+        assert str(int(verdict.final_score)) in explanation or f"{verdict.final_score}" in explanation
+        # Should mention at least one top agent signal
+        assert any(kw in explanation.lower() for kw in ["velocity", "geolocation", "graph"]), \
+            f"Expected top agent name in explanation, got: {explanation}"
+
+    def test_coordinator_processing_time(self, sample_assessments):
+        """processing_time_ms > 0."""
+        from backend.agents.coordinator_agent import CoordinatorAgent
+        coord = CoordinatorAgent(use_llm=False)
+        verdict = coord.synthesize("txn_time", sample_assessments)
+        assert verdict.processing_time_ms > 0
+
+    def test_coordinator_graph_weight(self):
+        """Graph Agent assessment has more impact than others (weight 0.30 vs 0.20-0.25)."""
+        from backend.agents.coordinator_agent import CoordinatorAgent
+        coord = CoordinatorAgent(use_llm=False)
+
+        # Scenario: Graph Agent scores 100, all others score 0
+        graph_high = [
+            make_assessment("Velocity Agent", 0, 1.0, []),
+            make_assessment("Geolocation Agent", 0, 1.0, []),
+            make_assessment("Graph Agent", 100, 1.0, ["Max fraud"]),
+            make_assessment("Behavioral Agent", 0, 1.0, []),
+        ]
+        v_graph = coord.synthesize("t_graph", graph_high)
+
+        # Scenario: Behavioral Agent scores 100, all others score 0
+        behav_high = [
+            make_assessment("Velocity Agent", 0, 1.0, []),
+            make_assessment("Geolocation Agent", 0, 1.0, []),
+            make_assessment("Graph Agent", 0, 1.0, []),
+            make_assessment("Behavioral Agent", 100, 1.0, ["Max deviation"]),
+        ]
+        v_behav = coord.synthesize("t_behav", behav_high)
+
+        # Graph=0.30 should produce higher score than Behavioral=0.20
+        assert v_graph.final_score > v_behav.final_score, \
+            f"Graph weight (score={v_graph.final_score}) should exceed Behavioral (score={v_behav.final_score})"
+
+    def test_coordinator_all_low_scores(self):
+        """All agents return <10 score -> verdict APPROVE, explanation mentions no significant risk."""
+        from backend.agents.coordinator_agent import CoordinatorAgent
+        coord = CoordinatorAgent(use_llm=False)
+        assessments = [
+            make_assessment("Velocity Agent", 5, 0.8, []),
+            make_assessment("Geolocation Agent", 3, 0.7, []),
+            make_assessment("Graph Agent", 7, 0.6, []),
+            make_assessment("Behavioral Agent", 2, 0.5, []),
+        ]
+        verdict = coord.synthesize("txn_safe", assessments)
+        assert verdict.verdict == "APPROVE"
+        assert "no significant" in verdict.explanation.lower() or verdict.final_score < 30
