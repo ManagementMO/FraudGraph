@@ -137,7 +137,7 @@ class TestWebSocketStream:
             assessment_msgs = [m for m in messages if m["type"] == "agent_assessment"]
             agent_names = [m["data"]["agent_name"] for m in assessment_msgs]
 
-            expected_order = ["VelocityAgent", "GeolocationAgent", "GraphAgent", "BehavioralAgent"]
+            expected_order = ["Velocity Agent", "Geolocation Agent", "Graph Agent", "Behavioral Agent"]
             assert agent_names == expected_order, f"Agent order {agent_names} != {expected_order}"
 
     def test_websocket_verdict_fields(self, test_client):
