@@ -3,16 +3,19 @@ FastAPI server for the FraudGraph fraud detection API.
 
 Wraps the FraudDetectionPipeline with REST endpoints for transaction
 analysis, dashboard stats, graph visualization, and sample data.
+Includes WebSocket streaming for real-time agent-by-agent fraud analysis.
 
 Usage:
     uvicorn backend.server:app --port 8000
 """
+import asyncio
+import json
 import math
 import time
 from contextlib import asynccontextmanager
 from typing import Optional
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -181,3 +184,82 @@ async def sample_transactions(n: int = Query(default=20, ge=1)):
     pipeline = app.state.pipeline
     samples = pipeline.get_sample_transactions(n)
     return [sanitize_dict(txn) for txn in samples]
+
+
+# --- WebSocket ---
+
+
+@app.websocket("/ws/stream")
+async def websocket_stream(websocket: WebSocket):
+    """
+    WebSocket endpoint for real-time agent-by-agent fraud analysis.
+
+    Accepts transaction JSON messages and streams back individual agent
+    assessments with dramatic timing (400ms between agents, 800ms before
+    verdict) for a compelling demo experience.
+
+    Message types sent:
+        - {"type": "agent_assessment", "data": {AgentAssessment fields}}
+        - {"type": "final_verdict", "data": {FraudVerdict fields}}
+        - {"type": "error", "data": {"message": "..."}}
+    """
+    await websocket.accept()
+    try:
+        while True:
+            # Receive transaction JSON from client
+            raw = await websocket.receive_text()
+
+            try:
+                txn = json.loads(raw)
+                txn = normalize_transaction(txn)
+                txn_id = txn.get("transaction_id", str(txn.get("TransactionID", "unknown")))
+
+                pipeline = app.state.pipeline
+
+                # Run agents individually in LOCKED order for streaming
+                agents = [
+                    pipeline.velocity_agent,
+                    pipeline.geo_agent,
+                    pipeline.graph_agent,
+                    pipeline.behavioral_agent,
+                ]
+
+                assessments = []
+                for agent in agents:
+                    assessment = agent.analyze(txn)
+                    assessments.append(assessment)
+                    await websocket.send_json({
+                        "type": "agent_assessment",
+                        "data": assessment.model_dump(),
+                    })
+                    await asyncio.sleep(0.4)  # 400ms dramatic delay
+
+                # Pre-verdict pause
+                await asyncio.sleep(0.8)  # 800ms before final verdict
+
+                # Coordinator synthesizes final verdict
+                verdict = pipeline.coordinator.synthesize(txn_id, assessments)
+                await websocket.send_json({
+                    "type": "final_verdict",
+                    "data": verdict.model_dump(),
+                })
+
+            except Exception as e:
+                # Error during analysis -- send error but keep connection alive
+                await websocket.send_json({
+                    "type": "error",
+                    "data": {"message": f"Analysis failed: {str(e)}"},
+                })
+
+    except WebSocketDisconnect:
+        # Normal client disconnect
+        pass
+    except Exception as e:
+        # Unexpected error -- attempt to notify client, then close
+        try:
+            await websocket.send_json({
+                "type": "error",
+                "data": {"message": f"Connection error: {str(e)}"},
+            })
+        except Exception:
+            pass
