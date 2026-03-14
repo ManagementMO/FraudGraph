@@ -111,3 +111,55 @@ class TestSampleTransactionsEndpoint:
                 if isinstance(val, float):
                     assert not math.isnan(val), f"NaN found in txn[{i}][{key}]"
                     assert not math.isinf(val), f"Inf found in txn[{i}][{key}]"
+
+
+class TestWebSocketStream:
+    """WebSocket /ws/stream streams agent assessments and final verdict."""
+
+    def test_websocket_streams_assessments(self, test_client):
+        """Connect, send transaction, receive 5 messages (4 assessments + 1 verdict)."""
+        with test_client.websocket_connect("/ws/stream") as ws:
+            ws.send_json({"amount": 5000.0, "card_id": "card_1_visa_debit"})
+            messages = [ws.receive_json() for _ in range(5)]
+
+            assessment_msgs = [m for m in messages if m["type"] == "agent_assessment"]
+            verdict_msgs = [m for m in messages if m["type"] == "final_verdict"]
+
+            assert len(assessment_msgs) == 4, f"Expected 4 assessments, got {len(assessment_msgs)}"
+            assert len(verdict_msgs) == 1, f"Expected 1 verdict, got {len(verdict_msgs)}"
+
+    def test_websocket_agent_order(self, test_client):
+        """Agent assessments arrive in locked order: Velocity, Geo, Graph, Behavioral."""
+        with test_client.websocket_connect("/ws/stream") as ws:
+            ws.send_json({"amount": 5000.0, "card_id": "card_1_visa_debit"})
+            messages = [ws.receive_json() for _ in range(5)]
+
+            assessment_msgs = [m for m in messages if m["type"] == "agent_assessment"]
+            agent_names = [m["data"]["agent_name"] for m in assessment_msgs]
+
+            expected_order = ["VelocityAgent", "GeolocationAgent", "GraphAgent", "BehavioralAgent"]
+            assert agent_names == expected_order, f"Agent order {agent_names} != {expected_order}"
+
+    def test_websocket_verdict_fields(self, test_client):
+        """Final verdict contains required fields."""
+        with test_client.websocket_connect("/ws/stream") as ws:
+            ws.send_json({"amount": 5000.0, "card_id": "card_1_visa_debit"})
+            messages = [ws.receive_json() for _ in range(5)]
+
+            verdict_msg = [m for m in messages if m["type"] == "final_verdict"][0]
+            data = verdict_msg["data"]
+
+            assert data["verdict"] in ("APPROVE", "FLAG", "BLOCK"), f"Invalid verdict: {data['verdict']}"
+            assert "final_score" in data
+            assert isinstance(data["agent_assessments"], list)
+            assert len(data["agent_assessments"]) == 4
+            assert "explanation" in data
+
+    def test_websocket_error_recovery(self, test_client):
+        """Malformed JSON produces error message, not a crash."""
+        with test_client.websocket_connect("/ws/stream") as ws:
+            ws.send_text("not_json")
+            msg = ws.receive_json()
+
+            assert msg["type"] == "error", f"Expected error type, got {msg['type']}"
+            assert "message" in msg["data"]
