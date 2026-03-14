@@ -1,1 +1,6 @@
+.planning/
 data/
+!backend/data/
+planning/
+.claude/
+.claude/settings.local.json
