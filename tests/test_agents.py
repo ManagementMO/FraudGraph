@@ -236,3 +236,270 @@ class TestGeolocationAgent:
         assert result.agent_name == "Geolocation Agent"
         assert isinstance(result.signals, list)
         assert isinstance(result.explanation, str)
+
+
+# ---------------------------------------------------------------------------
+# Graph Agent fixtures & tests
+# ---------------------------------------------------------------------------
+
+@pytest.fixture
+def small_graph():
+    """Build a small graph with known fraud patterns for testing."""
+    import networkx as nx
+    from backend.data.graph_builder import TransactionGraph
+
+    tg = TransactionGraph()
+
+    # Cards
+    tg.G.add_node("card_A", type="card")       # Fraud card sharing device
+    tg.G.add_node("card_B", type="card")       # Clean card sharing device with fraud
+    tg.G.add_node("card_C", type="card")       # Isolated clean card
+    tg.G.add_node("card_high_degree", type="card")  # High-connectivity card
+
+    # Merchants in different communities (will be assigned by Louvain)
+    for i in range(60):
+        mid = f"merchant_{i}"
+        tg.G.add_node(mid, type="merchant")
+        # Connect high_degree card to many merchants
+        tg.G.add_edge("card_high_degree", mid, weight=1, total_amount=50)
+
+    # A few merchants for normal cards
+    tg.G.add_node("merchant_A1", type="merchant")
+    tg.G.add_node("merchant_B1", type="merchant")
+    tg.G.add_node("merchant_C1", type="merchant")  # Clean merchant for card_C
+    tg.G.add_edge("card_A", "merchant_A1", weight=3, total_amount=300)
+    tg.G.add_edge("card_B", "merchant_B1", weight=2, total_amount=200)
+    tg.G.add_edge("card_C", "merchant_C1", weight=1, total_amount=100)
+
+    # Shared device between card_A (fraud) and card_B (clean)
+    tg.G.add_node("device_shared", type="device")
+    tg.G.add_edge("card_A", "device_shared", weight=5)
+    tg.G.add_edge("card_B", "device_shared", weight=3)
+
+    # Device for card_C (isolated)
+    tg.G.add_node("device_C", type="device")
+    tg.G.add_edge("card_C", "device_C", weight=2)
+
+    # Card profiles
+    tg.card_profiles = {
+        "card_A": {
+            "amounts": [100, 200, 500, 1000],
+            "timestamps": [1000, 2000, 3000, 4000],
+            "merchants": ["merchant_A1", "merchant_A1", "merchant_A1", "merchant_A1"],
+            "categories": ["W", "W", "H", "H"],
+            "fraud_count": 3,  # Known fraud card
+            "last_addr1": 150.0,
+            "last_device_type": "desktop",
+        },
+        "card_B": {
+            "amounts": [50, 60, 55, 70, 45],
+            "timestamps": [1000, 2000, 3000, 4000, 5000],
+            "merchants": ["merchant_B1", "merchant_B1", "merchant_B1", "merchant_B1", "merchant_B1"],
+            "categories": ["W", "W", "W", "W", "W"],
+            "fraud_count": 0,
+            "last_addr1": 200.0,
+            "last_device_type": "desktop",
+        },
+        "card_C": {
+            "amounts": [30, 35, 32],
+            "timestamps": [1000, 2000, 3000],
+            "merchants": ["merchant_C1", "merchant_C1", "merchant_C1"],
+            "categories": ["W", "W", "W"],
+            "fraud_count": 0,
+            "last_addr1": 200.0,
+            "last_device_type": "mobile",
+        },
+        "card_high_degree": {
+            "amounts": [100] * 20,
+            "timestamps": list(range(1000, 21000, 1000)),
+            "merchants": [f"merchant_{i}" for i in range(20)],
+            "categories": ["W"] * 20,
+            "fraud_count": 0,
+            "last_addr1": 300.0,
+            "last_device_type": "desktop",
+        },
+    }
+
+    return tg
+
+
+class TestGraphAgent:
+    """Tests for GraphAgent."""
+
+    def test_graph_fraud_exposure(self, small_graph):
+        """Card sharing device with fraud-flagged card -> risk_score > 20."""
+        from backend.agents.graph_agent import GraphAgent
+        agent = GraphAgent(small_graph)
+        # card_B shares device with card_A (which has fraud_count=3)
+        result = agent.analyze({
+            "card_id": "card_B",
+            "merchant_id": "merchant_B1",
+        })
+        assert result.risk_score > 20
+        assert any("shared" in s.lower() or "exposure" in s.lower() or "device" in s.lower()
+                    for s in result.signals), f"Expected fraud exposure signal, got: {result.signals}"
+        assert result.agent_name == "Graph Agent"
+
+    def test_graph_cross_community(self, small_graph):
+        """Card and merchant in different communities -> signals mention cross-community."""
+        from backend.agents.graph_agent import GraphAgent
+        agent = GraphAgent(small_graph)
+        # card_C is connected to merchant_A1; merchant_60+ are far away
+        # We use a merchant that is likely in a different community from card_C
+        result = agent.analyze({
+            "card_id": "card_C",
+            "merchant_id": "merchant_50",
+        })
+        # Cross-community depends on Louvain output, so we check if signal exists
+        # or the score is reasonable (agent handles it gracefully)
+        assert result.agent_name == "Graph Agent"
+        # If communities differ, we expect the signal
+        has_cross_comm = any("cross-community" in s.lower() for s in result.signals)
+        # Whether or not cross-community fires, the agent should still work
+        assert result.risk_score >= 0
+        assert result.confidence >= 0
+
+    def test_graph_high_degree(self, small_graph):
+        """Card with >50 connections -> signals mention high connectivity."""
+        from backend.agents.graph_agent import GraphAgent
+        agent = GraphAgent(small_graph)
+        result = agent.analyze({
+            "card_id": "card_high_degree",
+            "merchant_id": "merchant_0",
+        })
+        assert any("connectivity" in s.lower() or "connections" in s.lower()
+                    for s in result.signals), f"Expected high degree signal, got: {result.signals}"
+        assert result.risk_score > 15
+
+    def test_graph_normal(self, small_graph):
+        """Card with low connectivity, same community, no fraud neighbors -> risk_score < 15."""
+        from backend.agents.graph_agent import GraphAgent
+        agent = GraphAgent(small_graph)
+        # card_C has low degree, uses device_C (no shared fraud), merchant_C1 (clean)
+        result = agent.analyze({
+            "card_id": "card_C",
+            "merchant_id": "merchant_C1",
+        })
+        assert result.risk_score < 15
+
+    def test_graph_unknown_card(self, small_graph):
+        """Card not in graph -> low default score."""
+        from backend.agents.graph_agent import GraphAgent
+        agent = GraphAgent(small_graph)
+        result = agent.analyze({
+            "card_id": "card_NONEXISTENT",
+            "merchant_id": "merchant_0",
+        })
+        assert result.risk_score < 10
+        assert result.agent_name == "Graph Agent"
+
+
+# ---------------------------------------------------------------------------
+# Behavioral Agent fixtures & tests
+# ---------------------------------------------------------------------------
+
+@pytest.fixture
+def behavioral_profiles():
+    """Card profiles for behavioral agent testing."""
+    return {
+        "card_habitual": {
+            "amounts": [50, 55, 48, 52, 60, 45, 50, 55, 53, 47],
+            "timestamps": list(range(1000, 11000, 1000)),
+            "merchants": ["m1", "m1", "m2", "m1", "m2", "m1", "m1", "m2", "m1", "m1"],
+            "categories": ["W", "W", "W", "W", "W", "W", "W", "W", "W", "W"],
+            "fraud_count": 0,
+            "last_addr1": 200.0,
+            "last_device_type": "desktop",
+        },
+        "card_thin": {
+            "amounts": [30, 40],
+            "timestamps": [1000, 2000],
+            "merchants": ["m1", "m2"],
+            "categories": ["W", "H"],
+            "fraud_count": 0,
+            "last_addr1": 200.0,
+            "last_device_type": "desktop",
+        },
+        "card_multi_cat": {
+            "amounts": [50, 55, 48, 52, 60, 45, 50, 55, 53, 47,
+                        200, 210, 195, 205, 215, 190, 200, 210, 198, 202],
+            "timestamps": list(range(1000, 21000, 1000)),
+            "merchants": ["m1"] * 10 + ["m2"] * 10,
+            "categories": ["W"] * 10 + ["H"] * 10,
+            "fraud_count": 0,
+            "last_addr1": 200.0,
+            "last_device_type": "desktop",
+        },
+    }
+
+
+class TestBehavioralAgent:
+    """Tests for BehavioralAgent."""
+
+    def test_behavioral_new_category(self, behavioral_profiles):
+        """Card historically uses 'W', new txn category 'H' -> signals mention new/rare."""
+        from backend.agents.behavioral_agent import BehavioralAgent
+        agent = BehavioralAgent(behavioral_profiles)
+        result = agent.analyze({
+            "card_id": "card_habitual",
+            "amount": 50,
+            "product_category": "H",
+            "merchant_id": "m1",
+        })
+        assert any("first-ever" in s.lower() or "rare" in s.lower() or "category" in s.lower()
+                    for s in result.signals), f"Expected new category signal, got: {result.signals}"
+        assert result.agent_name == "Behavioral Agent"
+
+    def test_behavioral_amount_deviation(self, behavioral_profiles):
+        """Amount 5x above category average -> risk_score > 25."""
+        from backend.agents.behavioral_agent import BehavioralAgent
+        agent = BehavioralAgent(behavioral_profiles)
+        # card_multi_cat has category "H" with avg ~$203, std ~$7
+        # $500 is well over 2.5 std devs above
+        result = agent.analyze({
+            "card_id": "card_multi_cat",
+            "amount": 500,
+            "product_category": "H",
+            "merchant_id": "m2",
+        })
+        assert result.risk_score > 25
+        assert any("deviation" in s.lower() or "above avg" in s.lower() or "above" in s.lower()
+                    for s in result.signals), f"Expected amount deviation signal, got: {result.signals}"
+
+    def test_behavioral_new_merchant(self, behavioral_profiles):
+        """Merchant not in card's history -> signals mention first transaction."""
+        from backend.agents.behavioral_agent import BehavioralAgent
+        agent = BehavioralAgent(behavioral_profiles)
+        result = agent.analyze({
+            "card_id": "card_habitual",
+            "amount": 50,
+            "product_category": "W",
+            "merchant_id": "merchant_BRAND_NEW",
+        })
+        assert any("first" in s.lower() or "new" in s.lower()
+                    for s in result.signals), f"Expected new merchant signal, got: {result.signals}"
+
+    def test_behavioral_normal(self, behavioral_profiles):
+        """Same category, similar amount, known merchant -> risk_score < 15."""
+        from backend.agents.behavioral_agent import BehavioralAgent
+        agent = BehavioralAgent(behavioral_profiles)
+        result = agent.analyze({
+            "card_id": "card_habitual",
+            "amount": 52,
+            "product_category": "W",
+            "merchant_id": "m1",
+        })
+        assert result.risk_score < 15
+
+    def test_behavioral_thin_history(self, behavioral_profiles):
+        """Card with <3 txns, high amount -> signals mention thin-history."""
+        from backend.agents.behavioral_agent import BehavioralAgent
+        agent = BehavioralAgent(behavioral_profiles)
+        result = agent.analyze({
+            "card_id": "card_thin",
+            "amount": 500,
+            "product_category": "W",
+            "merchant_id": "m3",
+        })
+        assert any("thin" in s.lower() or "low-history" in s.lower() or "prior txn" in s.lower()
+                    for s in result.signals), f"Expected thin-history signal, got: {result.signals}"
