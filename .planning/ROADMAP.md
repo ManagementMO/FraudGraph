@@ -46,11 +46,11 @@ Plans:
   3. GET /stats returns accurate dashboard metrics (total transactions, fraud rate, graph node/edge counts)
   4. GET /graph/{card_id} returns a subgraph JSON structure suitable for D3.js force-directed rendering
   5. GET /sample-transactions returns a list of sample transactions for the frontend feed
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md -- FastAPI server with REST endpoints (POST /analyze, GET /stats, /graph, /sample-transactions)
+- [ ] 02-02-PLAN.md -- WebSocket /ws/stream with agent-by-agent streaming and dramatic timing
 
 ### Phase 3: Frontend Dashboard
 **Goal**: Judges can interact with a polished dashboard to submit transactions, watch agents reason in real-time, and explore fraud network graphs
@@ -89,7 +89,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Backend Pipeline | 3/3 | Complete | 2026-03-14 |
+| 1. Backend Pipeline | 3/3 | Complete    | 2026-03-14 |
 | 2. API Layer | 0/2 | Not started | - |
 | 3. Frontend Dashboard | 0/3 | Not started | - |
 | 4. Demo Preparation | 0/2 | Not started | - |
