@@ -18,8 +18,8 @@
 - [x] **AGNT-02**: Geolocation Agent analyzes geographic anomalies (address distance)
 - [x] **AGNT-03**: Graph Agent detects fraud networks via shared devices and community analysis
 - [x] **AGNT-04**: Behavioral Agent detects deviations from normal spending patterns
-- [ ] **AGNT-05**: Coordinator Agent synthesizes assessments with confidence-weighted scoring
-- [ ] **AGNT-06**: Coordinator generates LLM-powered explanations via Gemini with rule-based fallback
+- [x] **AGNT-05**: Coordinator Agent synthesizes assessments with confidence-weighted scoring
+- [x] **AGNT-06**: Coordinator generates LLM-powered explanations via Gemini with rule-based fallback
 
 ### API
 
@@ -83,8 +83,8 @@
 | AGNT-02 | Phase 1 | Complete |
 | AGNT-03 | Phase 1 | Complete |
 | AGNT-04 | Phase 1 | Complete |
-| AGNT-05 | Phase 1 | Pending |
-| AGNT-06 | Phase 1 | Pending |
+| AGNT-05 | Phase 1 | Complete |
+| AGNT-06 | Phase 1 | Complete |
 | API-01 | Phase 2 | Pending |
 | API-02 | Phase 2 | Pending |
 | API-03 | Phase 2 | Pending |
@@ -108,4 +108,4 @@
 
 ---
 *Requirements defined: 2026-03-14*
-*Last updated: 2026-03-14 after initial definition*
+*Last updated: 2026-03-14 after Phase 1 completion*

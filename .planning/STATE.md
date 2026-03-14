@@ -9,28 +9,28 @@ See: .planning/PROJECT.md (updated 2026-03-14)
 
 ## Current Position
 
-Phase: 1 of 4 (Backend Pipeline)
-Plan: 2 of 3 in current phase
-Status: Executing
-Last activity: 2026-03-14 -- Completed 01-02-PLAN.md
+Phase: 1 of 4 (Backend Pipeline) -- COMPLETE
+Plan: 3 of 3 in current phase
+Status: Phase Complete
+Last activity: 2026-03-14 -- Completed 01-03-PLAN.md
 
-Progress: [====░░░░░░] 20%
+Progress: [███░░░░░░░] 30%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 12min
-- Total execution time: 0.40 hours
+- Total plans completed: 3
+- Average duration: 13min
+- Total execution time: 0.67 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1. Backend Pipeline | 2/3 | 24min | 12min |
+| 1. Backend Pipeline | 3/3 | 40min | 13min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (10min), 01-02 (14min)
+- Last 5 plans: 01-01 (10min), 01-02 (14min), 01-03 (16min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -53,6 +53,9 @@ Recent decisions affecting current work:
 - 01-02: GraphAgent uses lazy community loading to support both pre-computed and on-demand modes
 - 01-02: GeolocationAgent is the only agent that mutates card_profiles (updates last_addr1, last_device_type)
 - 01-02: Agent weights: Velocity 0.25, Geolocation 0.25, Graph 0.30, Behavioral 0.20
+- 01-03: Processing time uses 3 decimal places to avoid sub-ms rounding to 0.0
+- 01-03: Pipeline defaults use_llm=False to conserve Gemini rate limits during batch testing
+- 01-03: LLM only called when score >20 to skip clearly safe transactions
 
 ### Pending Todos
 
@@ -67,5 +70,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-03-14
-Stopped at: Completed 01-02-PLAN.md (Worker Agents)
-Resume file: .planning/phases/01-backend-pipeline/01-02-SUMMARY.md
+Stopped at: Completed 01-03-PLAN.md (Coordinator + Pipeline) -- Phase 1 COMPLETE
+Resume file: .planning/phases/01-backend-pipeline/01-03-SUMMARY.md

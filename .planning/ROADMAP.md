@@ -12,7 +12,7 @@ FraudGraph goes from raw IEEE-CIS data to a demo-ready multi-agent fraud detecti
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Backend Pipeline** - Data loading, graph construction, all 5 agents, and Gemini-powered explanations
+- [x] **Phase 1: Backend Pipeline** - Data loading, graph construction, all 5 agents, and Gemini-powered explanations
 - [ ] **Phase 2: API Layer** - FastAPI REST endpoints and WebSocket streaming connecting agents to frontend
 - [ ] **Phase 3: Frontend Dashboard** - Next.js dashboard with D3.js graph, agent reasoning panel, and judge interaction
 - [ ] **Phase 4: Demo Preparation** - Fraud ring scenarios, batch evaluation metrics, and Gemini caching for reliable demo
@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 Plans:
 - [x] 01-01-PLAN.md -- Foundation + data pipeline (schemas, loader with temporal split, graph builder)
 - [x] 01-02-PLAN.md -- Worker agents (velocity, geolocation, graph, behavioral)
-- [ ] 01-03-PLAN.md -- Coordinator agent with Gemini + end-to-end pipeline runner
+- [x] 01-03-PLAN.md -- Coordinator agent with Gemini + end-to-end pipeline runner
 
 ### Phase 2: API Layer
 **Goal**: Frontend can call REST endpoints and receive WebSocket streams to analyze transactions and display results
@@ -89,7 +89,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Backend Pipeline | 2/3 | In Progress | - |
+| 1. Backend Pipeline | 3/3 | Complete | 2026-03-14 |
 | 2. API Layer | 0/2 | Not started | - |
 | 3. Frontend Dashboard | 0/3 | Not started | - |
 | 4. Demo Preparation | 0/2 | Not started | - |
