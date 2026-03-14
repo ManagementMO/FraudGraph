@@ -26,3 +26,26 @@ def transaction_graph(sample_train_test):
     graph = TransactionGraph()
     graph.build_from_dataframe(train_df)
     return graph
+
+
+# --- API / Server fixtures (session-scoped for speed) ---
+
+
+@pytest.fixture(scope="session")
+def test_pipeline():
+    """Session-scoped lightweight pipeline for API tests (500 txns, no LLM)."""
+    from backend.pipeline import FraudDetectionPipeline
+    pipeline = FraudDetectionPipeline(sample_size=500, use_llm=False)
+    pipeline.initialize()
+    return pipeline
+
+
+@pytest.fixture(scope="session")
+def test_client(test_pipeline):
+    """Session-scoped TestClient that reuses the lightweight pipeline."""
+    from starlette.testclient import TestClient
+    from backend.server import app
+    # Set pipeline directly on app.state to skip lifespan's heavy loading
+    app.state.pipeline = test_pipeline
+    with TestClient(app, raise_server_exceptions=False) as client:
+        yield client
