@@ -23,11 +23,11 @@
 
 ### API
 
-- [ ] **API-01**: POST /analyze returns full FraudVerdict for a transaction
+- [x] **API-01**: POST /analyze returns full FraudVerdict for a transaction
 - [ ] **API-02**: WebSocket /ws/stream streams agent assessments in real-time
-- [ ] **API-03**: GET /stats returns dashboard metrics (total txns, fraud rate, graph size)
-- [ ] **API-04**: GET /graph/{card_id} returns subgraph for D3 visualization
-- [ ] **API-05**: GET /sample-transactions returns sample transactions for the feed
+- [x] **API-03**: GET /stats returns dashboard metrics (total txns, fraud rate, graph size)
+- [x] **API-04**: GET /graph/{card_id} returns subgraph for D3 visualization
+- [x] **API-05**: GET /sample-transactions returns sample transactions for the feed
 
 ### Frontend
 
@@ -85,11 +85,11 @@
 | AGNT-04 | Phase 1 | Complete |
 | AGNT-05 | Phase 1 | Complete |
 | AGNT-06 | Phase 1 | Complete |
-| API-01 | Phase 2 | Pending |
+| API-01 | Phase 2 | Complete |
 | API-02 | Phase 2 | Pending |
-| API-03 | Phase 2 | Pending |
-| API-04 | Phase 2 | Pending |
-| API-05 | Phase 2 | Pending |
+| API-03 | Phase 2 | Complete |
+| API-04 | Phase 2 | Complete |
+| API-05 | Phase 2 | Complete |
 | UI-01 | Phase 3 | Pending |
 | UI-02 | Phase 3 | Pending |
 | UI-03 | Phase 3 | Pending |

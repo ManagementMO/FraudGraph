@@ -1,3 +1,19 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: executing
+stopped_at: Completed 02-01-PLAN.md (FastAPI REST endpoints)
+last_updated: "2026-03-14T22:34:44.018Z"
+last_activity: 2026-03-14 -- Completed 02-01-PLAN.md
+progress:
+  total_phases: 4
+  completed_phases: 1
+  total_plans: 5
+  completed_plans: 4
+  percent: 80
+---
+
 # Project State
 
 ## Project Reference
@@ -5,33 +21,34 @@
 See: .planning/PROJECT.md (updated 2026-03-14)
 
 **Core value:** Detect connected fraud networks through graph analysis -- not just individual transactions
-**Current focus:** Phase 1: Backend Pipeline
+**Current focus:** Phase 2: API Layer
 
 ## Current Position
 
-Phase: 1 of 4 (Backend Pipeline) -- COMPLETE
-Plan: 3 of 3 in current phase
-Status: Phase Complete
-Last activity: 2026-03-14 -- Completed 01-03-PLAN.md
+Phase: 2 of 4 (API Layer)
+Plan: 1 of 2 in current phase
+Status: In Progress
+Last activity: 2026-03-14 -- Completed 02-01-PLAN.md
 
-Progress: [███░░░░░░░] 30%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 13min
-- Total execution time: 0.67 hours
+- Total plans completed: 4
+- Average duration: 11min
+- Total execution time: 0.73 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Backend Pipeline | 3/3 | 40min | 13min |
+| 2. API Layer | 1/2 | 4min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (10min), 01-02 (14min), 01-03 (16min)
-- Trend: Stable
+- Last 5 plans: 01-01 (10min), 01-02 (14min), 01-03 (16min), 02-01 (4min)
+- Trend: Accelerating
 
 *Updated after each plan completion*
 
@@ -56,6 +73,10 @@ Recent decisions affecting current work:
 - 01-03: Processing time uses 3 decimal places to avoid sub-ms rounding to 0.0
 - 01-03: Pipeline defaults use_llm=False to conserve Gemini rate limits during batch testing
 - 01-03: LLM only called when score >20 to skip clearly safe transactions
+- [Phase 02]: 02-01: Used lifespan async context manager (not deprecated @app.on_event) for pipeline startup
+- [Phase 02]: 02-01: Session-scoped TestClient with 500-txn pipeline avoids slow test startup
+- [Phase 02]: 02-01: NaN sanitization applied at response level in /sample-transactions to guarantee JSON safety
+- [Phase 02]: 02-01: Graph node capping sorts by is_target then is_fraud to preserve most relevant nodes
 
 ### Pending Todos
 
@@ -69,6 +90,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-14
-Stopped at: Completed 01-03-PLAN.md (Coordinator + Pipeline) -- Phase 1 COMPLETE
-Resume file: .planning/phases/01-backend-pipeline/01-03-SUMMARY.md
+Last session: 2026-03-14T22:34:43.987Z
+Stopped at: Completed 02-01-PLAN.md (FastAPI REST endpoints)
+Resume file: .planning/phases/02-api-layer/02-01-SUMMARY.md
