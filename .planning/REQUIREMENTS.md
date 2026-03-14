@@ -24,7 +24,7 @@
 ### API
 
 - [x] **API-01**: POST /analyze returns full FraudVerdict for a transaction
-- [ ] **API-02**: WebSocket /ws/stream streams agent assessments in real-time
+- [x] **API-02**: WebSocket /ws/stream streams agent assessments in real-time
 - [x] **API-03**: GET /stats returns dashboard metrics (total txns, fraud rate, graph size)
 - [x] **API-04**: GET /graph/{card_id} returns subgraph for D3 visualization
 - [x] **API-05**: GET /sample-transactions returns sample transactions for the feed
@@ -86,7 +86,7 @@
 | AGNT-05 | Phase 1 | Complete |
 | AGNT-06 | Phase 1 | Complete |
 | API-01 | Phase 2 | Complete |
-| API-02 | Phase 2 | Pending |
+| API-02 | Phase 2 | Complete |
 | API-03 | Phase 2 | Complete |
 | API-04 | Phase 2 | Complete |
 | API-05 | Phase 2 | Complete |
