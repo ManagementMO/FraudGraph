@@ -49,9 +49,12 @@ export function GraphVisualization({
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const rect = svgRef.current.getBoundingClientRect();
-    const width = rect.width || 600;
-    const height = rect.height || 400;
+    const container = svgRef.current.parentElement;
+    const width = container?.clientWidth || 600;
+    const height = container?.clientHeight || 400;
+
+    // Set explicit dimensions on SVG so D3 has a coordinate space
+    svg.attr("width", width).attr("height", height);
 
     // -- Compute visible nodes based on assessment progress (split transition) --
     const totalAgents = 4;
@@ -292,7 +295,7 @@ export function GraphVisualization({
   // -- Empty state --
   if (!data) {
     return (
-      <div className="flex-1 min-h-0 bg-card-bg border border-border rounded-lg overflow-hidden relative flex items-center justify-center">
+      <div className="flex-1 min-h-0 bg-card-bg border border-border rounded-lg overflow-hidden relative flex items-center justify-center" style={{ minHeight: "300px" }}>
         <div className="text-center text-text-secondary">
           <svg
             className="mx-auto mb-3 opacity-30"
@@ -336,8 +339,8 @@ export function GraphVisualization({
   }
 
   return (
-    <div className="flex-1 min-h-0 bg-card-bg border border-border rounded-lg overflow-hidden relative">
-      <svg ref={svgRef} className="w-full h-full" />
+    <div className="flex-1 min-h-0 bg-card-bg border border-border rounded-lg overflow-hidden relative" style={{ minHeight: "300px" }}>
+      <svg ref={svgRef} className="w-full h-full" style={{ display: "block" }} />
 
       {/* Tooltip */}
       {tooltip.visible && tooltip.node && (
