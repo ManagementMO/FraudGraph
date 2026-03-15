@@ -13,6 +13,7 @@ import json
 import math
 import time
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, Query, WebSocket, WebSocketDisconnect
@@ -48,6 +49,13 @@ async def lifespan(app: FastAPI):
     start = time.time()
     pipeline = FraudDetectionPipeline(use_llm=True)
     pipeline.initialize()
+    # Load Gemini explanation cache for demo reliability
+    cache_path = Path(__file__).parent / "demo" / "gemini_cache.json"
+    if cache_path.exists():
+        with open(cache_path) as f:
+            pipeline.coordinator._explanation_cache = json.load(f)
+        print(f"Loaded {len(pipeline.coordinator._explanation_cache)} cached explanations")
+
     app.state.pipeline = pipeline
 
     elapsed = time.time() - start

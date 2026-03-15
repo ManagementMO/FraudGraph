@@ -13,8 +13,10 @@ Explanation format:
 - Narrative: 2-3 sentences describing the verdict
 - Technical signals: 3-4 bullet points with key risk indicators
 """
+import json
 import os
 import time
+from pathlib import Path
 from backend.models.schemas import AgentAssessment, FraudVerdict
 from dotenv import load_dotenv
 
@@ -37,9 +39,18 @@ class CoordinatorAgent:
     # User-locked thresholds (NOT build spec values)
     THRESHOLDS = {"BLOCK": 70, "FLAG": 30}
 
-    def __init__(self, use_llm: bool = True):
+    def __init__(self, use_llm: bool = True, cache_path: str | None = None):
         self.use_llm = use_llm
         self.llm = None
+
+        # Load explanation cache for demo reliability
+        self._explanation_cache: dict[str, str] = {}
+        if cache_path:
+            cp = Path(cache_path)
+            if cp.exists():
+                with open(cp) as f:
+                    self._explanation_cache = json.load(f)
+                print(f"CoordinatorAgent: loaded {len(self._explanation_cache)} cached explanations")
 
         if use_llm:
             api_key = os.getenv("GOOGLE_API_KEY")
@@ -82,8 +93,11 @@ class CoordinatorAgent:
         else:
             verdict = "APPROVE"
 
-        # Explanation: LLM for FLAG/BLOCK when available, rule-based otherwise
-        if self.use_llm and self.llm is not None and final_score > 20:
+        # Explanation: cache-first for demo reliability, then LLM, then rule-based
+        cached_explanation = self._explanation_cache.get(transaction_id)
+        if cached_explanation:
+            explanation = cached_explanation
+        elif self.use_llm and self.llm is not None and final_score > 20:
             explanation = self._llm_explanation(transaction_id, assessments, final_score, verdict)
         else:
             explanation = self._rule_based_explanation(assessments, final_score, verdict)

@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Backend Pipeline** - Data loading, graph construction, all 5 agents, and Gemini-powered explanations
 - [x] **Phase 2: API Layer** - FastAPI REST endpoints and WebSocket streaming connecting agents to frontend (completed 2026-03-14)
-- [ ] **Phase 3: Frontend Dashboard** - Next.js dashboard with D3.js graph, agent reasoning panel, and judge interaction
+- [x] **Phase 3: Frontend Dashboard** - Next.js dashboard with D3.js graph, agent reasoning panel, and judge interaction (completed 2026-03-15)
 - [ ] **Phase 4: Demo Preparation** - Fraud ring scenarios, batch evaluation metrics, and Gemini caching for reliable demo
 
 ## Phase Details
@@ -65,8 +65,8 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md -- Foundation: TypeScript types, API helpers, hooks, theme system, layout skeleton with component stubs
-- [ ] 03-02-PLAN.md -- Left column: JudgeTestForm (preset buttons + form), AgentReasoningPanel (terminal streaming + score bars), VerdictBanner (animated verdict + processing time)
-- [ ] 03-03-PLAN.md -- Right column: D3.js GraphVisualization (neon colors, zoom/drag, split transition), StatsBar (dashboard metrics)
+- [x] 03-02-PLAN.md -- Left column: JudgeTestForm (preset buttons + form), AgentReasoningPanel (terminal streaming + score bars), VerdictBanner (animated verdict + processing time)
+- [x] 03-03-PLAN.md -- Right column: D3.js GraphVisualization (neon colors, zoom/drag, split transition), StatsBar (dashboard metrics)
 
 ### Phase 4: Demo Preparation
 **Goal**: Demo runs reliably under pressure with pre-scripted fraud ring scenarios, proven accuracy metrics, and no rate limit failures
@@ -76,11 +76,11 @@ Plans:
   1. A pre-identified fraud ring scenario is loaded and ready -- running it through the system produces a compelling multi-node graph and high-confidence fraud verdict
   2. Batch evaluation on the test set produces precision, recall, and F1 scores displayed in the UI or available for judge Q&A
   3. Gemini explanations for demo scenarios are cached so the demo works even if the API rate-limits during the presentation
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
+- [ ] 04-01-PLAN.md -- Demo scenarios: find real card_ids, Gemini caching, coordinator cache-first logic, frontend preset updates
+- [ ] 04-02-PLAN.md -- Batch evaluation: precision/recall/F1 on test set with graph-specific highlights
 
 ## Progress
 
@@ -91,5 +91,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. Backend Pipeline | 3/3 | Complete    | 2026-03-14 |
 | 2. API Layer | 2/2 | Complete    | 2026-03-14 |
-| 3. Frontend Dashboard | 1/3 | In progress | - |
+| 3. Frontend Dashboard | 3/3 | Complete    | 2026-03-15 |
 | 4. Demo Preparation | 0/2 | Not started | - |
