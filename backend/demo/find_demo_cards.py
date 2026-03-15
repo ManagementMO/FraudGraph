@@ -41,11 +41,7 @@ def find_demo_cards():
 
     for card_id, profile in card_profiles.items():
         # Need a card with transaction history but no fraud
-        if len(profile["amounts"]) < 3 or profile["fraud_count"] > 0:
-            continue
-
-        exposure = pipeline.graph.get_fraud_exposure(card_id)
-        if exposure["exposure_score"] > 0:
+        if len(profile["amounts"]) < 2 or profile["fraud_count"] > 0:
             continue
 
         txn = normalize_transaction({

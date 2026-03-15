@@ -119,7 +119,7 @@ export const PRESET_TRANSACTIONS: Array<{
     data: {
       transaction_id: "demo_suspicious",
       amount: 5000,
-      card_id: "card_1_visa_debit",
+      card_id: "card_13926_discover_credit",
       merchant_id: "merchant_H_999",
       product_category: "H",
       hour_of_day: 3,
@@ -131,7 +131,7 @@ export const PRESET_TRANSACTIONS: Array<{
     data: {
       transaction_id: "demo_normal",
       amount: 25.50,
-      card_id: "card_1_visa_debit",
+      card_id: "card_1662_visa_debit",
       merchant_id: "merchant_W_300",
       product_category: "W",
       hour_of_day: 14,
@@ -143,8 +143,7 @@ export const PRESET_TRANSACTIONS: Array<{
     data: {
       transaction_id: "demo_fraud_ring",
       amount: 1200,
-      card_id: "card_2_visa_credit",
-      merchant_id: "merchant_W_100",
+      card_id: "card_12695_visa_debit",
       product_category: "W",
       hour_of_day: 22,
     },
@@ -155,7 +154,7 @@ export const PRESET_TRANSACTIONS: Array<{
     data: {
       transaction_id: "demo_night",
       amount: 800,
-      card_id: "card_1_visa_debit",
+      card_id: "card_13926_discover_credit",
       merchant_id: "merchant_C_500",
       product_category: "C",
       hour_of_day: 2.5,

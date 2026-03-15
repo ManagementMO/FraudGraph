@@ -1,0 +1,12 @@
+{
+  "demo_normal": "Score 12.8/100 (APPROVE). No significant risk signals detected.",
+  "demo_suspicious": "Score 51.7/100 (FLAG). Graph Agent flagged: Graph exposure: 100/100. Velocity Agent flagged: High-value $5000.00 on new/low-history card.\n- Graph exposure: 100/100\n- Shares device with 512 other cards\n- High-value $5000.00 on new/low-history card",
+  "demo_fraud_ring": "Score 74.7/100 (BLOCK). Graph Agent flagged: Graph exposure: 100/100. Velocity Agent flagged: Amount $1200.00 is 7.3 std devs above average ($123.68). Behavioral Agent flagged: $1200.00 is 6.9x above avg for 'W' (avg $126.03).\n- Graph exposure: 100/100\n- Shares device with 762 other cards\n- Amount $1200.00 is 7.3 std devs above average ($123.68)\n- $1200.00 is 6.9x above avg for 'W' (avg $126.03)",
+  "demo_night": "Score 47.0/100 (FLAG). Graph Agent flagged: Graph exposure: 100/100. Velocity Agent flagged: High-value $800.00 on new/low-history card.\n- Graph exposure: 100/100\n- Shares device with 512 other cards\n- High-value $800.00 on new/low-history card",
+  "3026984": "Score 40.2/100 (FLAG). Graph Agent flagged: Graph exposure: 100/100.\n- Graph exposure: 100/100\n- Shares device with 859 other cards",
+  "3027040": "Score 51.2/100 (FLAG). Graph Agent flagged: Graph exposure: 100/100. Velocity Agent flagged: Amount $834.00 is 3.3 std devs above average ($169.90).\n- Graph exposure: 100/100\n- Shares device with 870 other cards\n- Amount $834.00 is 3.3 std devs above average ($169.90)",
+  "3027046": "Score 40.9/100 (FLAG). Graph Agent flagged: Graph exposure: 100/100.\n- Graph exposure: 100/100\n- Shares device with 870 other cards",
+  "3027058": "Score 72.7/100 (BLOCK). Velocity Agent flagged: Amount $2680.99 is 14.5 std devs above average ($114.96). Graph Agent flagged: Graph exposure: 100/100. Behavioral Agent flagged: $2680.99 is 14.0x above avg for 'W' (avg $117.95).\n- Amount $2680.99 is 14.5 std devs above average ($114.96)\n- Graph exposure: 100/100\n- Shares device with 821 other cards\n- $2680.99 is 14.0x above avg for 'W' (avg $117.95)",
+  "3027109": "Score 46.5/100 (FLAG). Graph Agent flagged: Graph exposure: 100/100.\n- Graph exposure: 100/100\n- Shares device with 512 other cards",
+  "3027125": "Score 16.1/100 (APPROVE). No significant risk signals detected."
+}
