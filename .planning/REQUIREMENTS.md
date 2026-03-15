@@ -34,7 +34,7 @@
 - [ ] **UI-01**: JudgeTestForm lets judges input custom transactions and see live results
 - [ ] **UI-02**: AgentReasoningPanel shows each agent's assessment streaming in real-time
 - [ ] **UI-03**: D3.js force-directed fraud network graph with color-coded nodes
-- [ ] **UI-04**: StatsBar showing key metrics (transaction count, fraud rate, graph nodes)
+- [x] **UI-04**: StatsBar showing key metrics (transaction count, fraud rate, graph nodes)
 - [ ] **UI-05**: Agent consensus/disagreement visualization with score bars
 - [ ] **UI-06**: APPROVE/FLAG/BLOCK verdict display with color coding
 - [ ] **UI-07**: Processing time prominently displayed
@@ -93,7 +93,7 @@
 | UI-01 | Phase 3 | Pending |
 | UI-02 | Phase 3 | Pending |
 | UI-03 | Phase 3 | Pending |
-| UI-04 | Phase 3 | Pending |
+| UI-04 | Phase 3 | Complete |
 | UI-05 | Phase 3 | Pending |
 | UI-06 | Phase 3 | Pending |
 | UI-07 | Phase 3 | Pending |
@@ -108,4 +108,4 @@
 
 ---
 *Requirements defined: 2026-03-14*
-*Last updated: 2026-03-14 after Phase 1 completion*
+*Last updated: 2026-03-14 after Phase 3 Plan 01 completion*

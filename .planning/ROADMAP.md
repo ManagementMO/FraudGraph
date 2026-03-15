@@ -64,7 +64,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 03-01-PLAN.md -- Foundation: TypeScript types, API helpers, hooks, theme system, layout skeleton with component stubs
+- [x] 03-01-PLAN.md -- Foundation: TypeScript types, API helpers, hooks, theme system, layout skeleton with component stubs
 - [ ] 03-02-PLAN.md -- Left column: JudgeTestForm (preset buttons + form), AgentReasoningPanel (terminal streaming + score bars), VerdictBanner (animated verdict + processing time)
 - [ ] 03-03-PLAN.md -- Right column: D3.js GraphVisualization (neon colors, zoom/drag, split transition), StatsBar (dashboard metrics)
 
@@ -91,5 +91,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. Backend Pipeline | 3/3 | Complete    | 2026-03-14 |
 | 2. API Layer | 2/2 | Complete    | 2026-03-14 |
-| 3. Frontend Dashboard | 0/3 | Not started | - |
+| 3. Frontend Dashboard | 1/3 | In progress | - |
 | 4. Demo Preparation | 0/2 | Not started | - |
