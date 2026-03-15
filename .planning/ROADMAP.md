@@ -79,7 +79,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md -- Demo scenarios: find real card_ids, Gemini caching, coordinator cache-first logic, frontend preset updates
+- [x] 04-01-PLAN.md -- Demo scenarios: find real card_ids, Gemini caching, coordinator cache-first logic, frontend preset updates
 - [ ] 04-02-PLAN.md -- Batch evaluation: precision/recall/F1 on test set with graph-specific highlights
 
 ## Progress
@@ -92,4 +92,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Backend Pipeline | 3/3 | Complete    | 2026-03-14 |
 | 2. API Layer | 2/2 | Complete    | 2026-03-14 |
 | 3. Frontend Dashboard | 3/3 | Complete    | 2026-03-15 |
-| 4. Demo Preparation | 0/2 | Not started | - |
+| 4. Demo Preparation | 1/2 | In Progress | - |
