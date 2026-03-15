@@ -31,13 +31,13 @@
 
 ### Frontend
 
-- [ ] **UI-01**: JudgeTestForm lets judges input custom transactions and see live results
-- [ ] **UI-02**: AgentReasoningPanel shows each agent's assessment streaming in real-time
+- [x] **UI-01**: JudgeTestForm lets judges input custom transactions and see live results
+- [x] **UI-02**: AgentReasoningPanel shows each agent's assessment streaming in real-time
 - [ ] **UI-03**: D3.js force-directed fraud network graph with color-coded nodes
 - [x] **UI-04**: StatsBar showing key metrics (transaction count, fraud rate, graph nodes)
-- [ ] **UI-05**: Agent consensus/disagreement visualization with score bars
-- [ ] **UI-06**: APPROVE/FLAG/BLOCK verdict display with color coding
-- [ ] **UI-07**: Processing time prominently displayed
+- [x] **UI-05**: Agent consensus/disagreement visualization with score bars
+- [x] **UI-06**: APPROVE/FLAG/BLOCK verdict display with color coding
+- [x] **UI-07**: Processing time prominently displayed
 
 ### Demo Preparation
 
@@ -90,13 +90,13 @@
 | API-03 | Phase 2 | Complete |
 | API-04 | Phase 2 | Complete |
 | API-05 | Phase 2 | Complete |
-| UI-01 | Phase 3 | Pending |
-| UI-02 | Phase 3 | Pending |
+| UI-01 | Phase 3 | Complete |
+| UI-02 | Phase 3 | Complete |
 | UI-03 | Phase 3 | Pending |
 | UI-04 | Phase 3 | Complete |
-| UI-05 | Phase 3 | Pending |
-| UI-06 | Phase 3 | Pending |
-| UI-07 | Phase 3 | Pending |
+| UI-05 | Phase 3 | Complete |
+| UI-06 | Phase 3 | Complete |
+| UI-07 | Phase 3 | Complete |
 | DEMO-01 | Phase 4 | Pending |
 | DEMO-02 | Phase 4 | Pending |
 | DEMO-03 | Phase 4 | Pending |
