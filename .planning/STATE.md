@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in-progress
-stopped_at: Completed 04-01-PLAN.md (Demo Scenarios & Cache)
-last_updated: "2026-03-15T01:16:57Z"
-last_activity: 2026-03-15 -- Completed 04-01-PLAN.md (Demo Scenarios & Cache)
+status: complete
+stopped_at: Completed 04-02-PLAN.md (Batch Evaluation Metrics)
+last_updated: "2026-03-15T01:23:41Z"
+last_activity: 2026-03-15 -- Completed 04-02-PLAN.md (Batch Evaluation Metrics)
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 10
-  completed_plans: 9
-  percent: 90
+  completed_plans: 10
+  percent: 100
 ---
 
 # Project State
@@ -21,23 +21,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-14)
 
 **Core value:** Detect connected fraud networks through graph analysis -- not just individual transactions
-**Current focus:** Phase 4: Demo Preparation -- Plan 1 complete, Plan 2 remaining
+**Current focus:** PROJECT COMPLETE -- All 4 phases, 10 plans done
 
 ## Current Position
 
 Phase: 4 of 4 (Demo Preparation)
-Plan: 1 of 2 in current phase
-Status: 04-01 Complete
-Last activity: 2026-03-15 -- Completed 04-01-PLAN.md (Demo Scenarios & Cache)
+Plan: 2 of 2 in current phase
+Status: ALL PLANS COMPLETE
+Last activity: 2026-03-15 -- Completed 04-02-PLAN.md (Batch Evaluation Metrics)
 
-Progress: [█████████░] 90%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
-- Average duration: 10min
-- Total execution time: 1.4 hours
+- Total plans completed: 10
+- Average duration: 9min
+- Total execution time: 1.5 hours
 
 **By Phase:**
 
@@ -46,10 +46,10 @@ Progress: [█████████░] 90%
 | 1. Backend Pipeline | 3/3 | 40min | 13min |
 | 2. API Layer | 2/2 | 8min | 4min |
 | 3. Frontend Dashboard | 3/3 | 30min | 10min |
-| 4. Demo Preparation | 1/2 | 8min | 8min |
+| 4. Demo Preparation | 2/2 | 11min | 6min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (4min), 03-01 (12min), 03-02 (8min), 03-03 (10min), 04-01 (8min)
+- Last 5 plans: 03-01 (12min), 03-02 (8min), 03-03 (10min), 04-01 (8min), 04-02 (3min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -57,6 +57,7 @@ Progress: [█████████░] 90%
 | Phase 03 P02 | 8min | 2 tasks | 3 files |
 | Phase 03 P03 | 10min | 2 tasks | 2 files |
 | Phase 04 P01 | 8min | 2 tasks | 9 files |
+| Phase 04 P02 | 3min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -99,6 +100,9 @@ Recent decisions affecting current work:
 - [Phase 04]: 04-01: Real card_ids: act1=card_1662_visa_debit (APPROVE 12.8), act2=card_13926_discover_credit (FLAG 51.7), act3=card_12695_visa_debit (BLOCK 74.7)
 - [Phase 04]: 04-01: Cache injection via direct attribute assignment in server.py lifespan (avoids changing CoordinatorAgent constructor signature)
 - [Phase 04]: 04-01: 3-tier fallback: cache -> live Gemini -> rule-based explanations
+- [Phase 04]: 04-02: Used itertuples() for evaluation iteration per Phase 1 performance decision
+- [Phase 04]: 04-02: Graph highlights threshold: Graph Agent > 30 AND all others < 30 for unique detection
+- [Phase 04]: 04-02: Module-scoped pipeline fixture (500 txns) for fast test execution
 
 ### Pending Todos
 
@@ -112,6 +116,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T01:16:57Z
-Stopped at: Completed 04-01-PLAN.md (Demo Scenarios & Cache)
+Last session: 2026-03-15T01:23:41Z
+Stopped at: Completed 04-02-PLAN.md (Batch Evaluation Metrics) -- PROJECT COMPLETE
 Resume file: None

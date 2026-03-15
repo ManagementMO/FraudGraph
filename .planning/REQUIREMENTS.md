@@ -42,7 +42,7 @@
 ### Demo Preparation
 
 - [x] **DEMO-01**: Pre-identified fraud ring scenario for demo centerpiece
-- [ ] **DEMO-02**: Batch evaluation showing precision/recall/F1 on test set
+- [x] **DEMO-02**: Batch evaluation showing precision/recall/F1 on test set
 - [x] **DEMO-03**: Gemini explanation caching to avoid rate limit during demo
 
 ## v2 Requirements
@@ -98,7 +98,7 @@
 | UI-06 | Phase 3 | Complete |
 | UI-07 | Phase 3 | Complete |
 | DEMO-01 | Phase 4 | Complete |
-| DEMO-02 | Phase 4 | Pending |
+| DEMO-02 | Phase 4 | Complete |
 | DEMO-03 | Phase 4 | Complete |
 
 **Coverage:**
