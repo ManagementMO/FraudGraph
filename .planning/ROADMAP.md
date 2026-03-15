@@ -13,7 +13,7 @@ FraudGraph goes from raw IEEE-CIS data to a demo-ready multi-agent fraud detecti
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Backend Pipeline** - Data loading, graph construction, all 5 agents, and Gemini-powered explanations
-- [ ] **Phase 2: API Layer** - FastAPI REST endpoints and WebSocket streaming connecting agents to frontend
+- [x] **Phase 2: API Layer** - FastAPI REST endpoints and WebSocket streaming connecting agents to frontend (completed 2026-03-14)
 - [ ] **Phase 3: Frontend Dashboard** - Next.js dashboard with D3.js graph, agent reasoning panel, and judge interaction
 - [ ] **Phase 4: Demo Preparation** - Fraud ring scenarios, batch evaluation metrics, and Gemini caching for reliable demo
 
@@ -49,8 +49,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md -- FastAPI server with REST endpoints (POST /analyze, GET /stats, /graph, /sample-transactions)
-- [ ] 02-02-PLAN.md -- WebSocket /ws/stream with agent-by-agent streaming and dramatic timing
+- [x] 02-01-PLAN.md -- FastAPI server with REST endpoints (POST /analyze, GET /stats, /graph, /sample-transactions)
+- [x] 02-02-PLAN.md -- WebSocket /ws/stream with agent-by-agent streaming and dramatic timing
 
 ### Phase 3: Frontend Dashboard
 **Goal**: Judges can interact with a polished dashboard to submit transactions, watch agents reason in real-time, and explore fraud network graphs
@@ -61,12 +61,12 @@ Plans:
   2. Agent reasoning panel shows each agent's assessment with score bars and consensus/disagreement visualization
   3. D3.js force-directed graph renders a fraud network with color-coded nodes (card, merchant, device) that is interactive (zoom, drag, hover)
   4. Dashboard displays key metrics (transaction count, fraud rate, graph size) and the final APPROVE/FLAG/BLOCK verdict with color coding and processing time
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
-- [ ] 03-03: TBD
+- [ ] 03-01-PLAN.md -- Foundation: TypeScript types, API helpers, hooks, theme system, layout skeleton with component stubs
+- [ ] 03-02-PLAN.md -- Left column: JudgeTestForm (preset buttons + form), AgentReasoningPanel (terminal streaming + score bars), VerdictBanner (animated verdict + processing time)
+- [ ] 03-03-PLAN.md -- Right column: D3.js GraphVisualization (neon colors, zoom/drag, split transition), StatsBar (dashboard metrics)
 
 ### Phase 4: Demo Preparation
 **Goal**: Demo runs reliably under pressure with pre-scripted fraud ring scenarios, proven accuracy metrics, and no rate limit failures
@@ -90,6 +90,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Backend Pipeline | 3/3 | Complete    | 2026-03-14 |
-| 2. API Layer | 0/2 | Not started | - |
+| 2. API Layer | 2/2 | Complete    | 2026-03-14 |
 | 3. Frontend Dashboard | 0/3 | Not started | - |
 | 4. Demo Preparation | 0/2 | Not started | - |
