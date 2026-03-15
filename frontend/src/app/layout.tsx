@@ -1,33 +1,30 @@
 import type { Metadata } from "next";
-import { Sora, JetBrains_Mono } from "next/font/google";
+import { Rajdhani, Fragment_Mono } from "next/font/google";
 import "./globals.css";
 
-const sora = Sora({
-  variable: "--font-sora",
+const rajdhani = Rajdhani({
+  weight: ['400', '500', '600', '700'],
+  variable: "--font-ui",
   subsets: ["latin"],
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
+const fragmentMono = Fragment_Mono({
+  weight: '400',
+  variable: "--font-mono",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "FraudGraph - Multi-Agent Fraud Detection",
-  description:
-    "Real-time fraud detection with multi-agent analysis and graph visualization",
+  title: "FraudGraph — Deep Space Surveillance",
+  description: "Real-time fraud detection with multi-agent analysis and 3D graph visualization",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="dark">
-      <body
-        className={`${sora.variable} ${jetbrainsMono.variable} font-sans min-h-screen bg-background`}
-      >
+    <html lang="en">
+      <body className={`${rajdhani.variable} ${fragmentMono.variable}`}>
         {children}
       </body>
     </html>

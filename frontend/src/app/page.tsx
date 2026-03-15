@@ -1,29 +1,23 @@
-"use client";
+'use client';
 
-import { useState, useCallback, useEffect } from "react";
-import { HeaderBar } from "@/components/HeaderBar";
-import { JudgeTestForm } from "@/components/JudgeTestForm";
-import { AgentReasoningPanel, VerdictCard } from "@/components/AgentReasoningPanel";
-import { GraphVisualization } from "@/components/GraphVisualization";
-import { TransactionFeed } from "@/components/TransactionFeed";
-import { useWebSocket } from "@/hooks/useWebSocket";
-import { fetchGraph, WS_URL } from "@/lib/api";
-import type {
-  AgentAssessment,
-  FraudVerdict,
-  GraphData,
-  AnalyzeRequest,
-} from "@/lib/types";
+import { useState, useCallback, useEffect } from 'react';
+import { GraphVisualization } from '@/components/graph-visualization';
+import { HudHeader } from '@/components/hud-header';
+import { HudTestForm } from '@/components/hud-test-form';
+import { HudAgentPanel } from '@/components/hud-agent-panel';
+import { HudVerdict } from '@/components/hud-verdict';
+import { HudFeed } from '@/components/hud-feed';
+import { useWebSocket } from '@/hooks/useWebSocket';
+import { fetchGraph, normalizeGraphData, WS_URL } from '@/lib/api';
+import type { AgentAssessment, FraudVerdict, GraphData, AnalyzeRequest } from '@/lib/types';
 
 export default function Dashboard() {
-  const [agentAssessments, setAgentAssessments] = useState<AgentAssessment[]>(
-    []
-  );
+  const [agentAssessments, setAgentAssessments] = useState<AgentAssessment[]>([]);
   const [verdict, setVerdict] = useState<FraudVerdict | null>(null);
   const [graphData, setGraphData] = useState<GraphData | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] =
-    useState<Partial<AnalyzeRequest> | undefined>(undefined);
+  const [selectedTransaction, setSelectedTransaction] = useState<Partial<AnalyzeRequest> | undefined>();
+  const [feedOpen, setFeedOpen] = useState(true);
 
   const { connect, send, isConnected, onMessageRef } = useWebSocket(WS_URL);
 
@@ -31,90 +25,113 @@ export default function Dashboard() {
   useEffect(() => {
     onMessageRef.current = (msg) => {
       switch (msg.type) {
-        case "agent_assessment":
-          setAgentAssessments((prev) => [...prev, msg.data]);
+        case 'agent_assessment':
+          setAgentAssessments(prev => [...prev, msg.data]);
           break;
-        case "final_verdict":
+        case 'final_verdict':
           setVerdict(msg.data);
           setIsAnalyzing(false);
           break;
-        case "error":
-          console.error("WebSocket error:", msg.data.message);
+        case 'error':
+          console.error('WebSocket error:', msg.data.message);
           setIsAnalyzing(false);
           break;
       }
     };
   }, [onMessageRef]);
 
-  const handleSubmit = useCallback(
-    async (transaction: AnalyzeRequest) => {
-      // Reset state for new analysis
-      setAgentAssessments([]);
-      setVerdict(null);
-      setGraphData(null);
-      setIsAnalyzing(true);
+  const handleSubmit = useCallback(async (transaction: AnalyzeRequest) => {
+    setAgentAssessments([]);
+    setVerdict(null);
+    setGraphData(null);
+    setIsAnalyzing(true);
 
-      // Connect WebSocket and fetch graph in parallel
-      try {
-        const [graph] = await Promise.all([
-          fetchGraph(transaction.card_id).catch((err) => {
-            console.error("Failed to fetch graph:", err);
-            return null;
-          }),
-          isConnected ? Promise.resolve() : connect(),
-        ]);
-        if (graph) setGraphData(graph);
-      } catch (err) {
-        console.error("WebSocket connection failed:", err);
-        setIsAnalyzing(false);
-        return;
-      }
+    try {
+      const [graph] = await Promise.all([
+        fetchGraph(transaction.card_id).catch(err => {
+          console.error('Failed to fetch graph:', err);
+          return null;
+        }),
+        isConnected ? Promise.resolve() : connect(),
+      ]);
+      if (graph) setGraphData(normalizeGraphData(graph));
+    } catch (err) {
+      console.error('WebSocket connection failed:', err);
+      setIsAnalyzing(false);
+      return;
+    }
 
-      // WebSocket is guaranteed open now — send transaction
-      send(transaction);
-    },
-    [isConnected, connect, send]
-  );
-
-  const handleSelectTransaction = useCallback(
-    (values: Partial<AnalyzeRequest>) => {
-      setSelectedTransaction(values);
-    },
-    []
-  );
+    send(transaction);
+  }, [isConnected, connect, send]);
 
   return (
-    <div className="flex flex-col h-screen bg-background">
-      <HeaderBar />
-      <main className="flex-1 grid grid-rows-[1fr_auto] gap-4 p-6 min-h-0">
-        {/* Top row: Graph | Form | Agents */}
-        <div className="grid grid-cols-[1.4fr_0.8fr_1fr] gap-4 min-h-0">
-          <GraphVisualization data={graphData} assessments={agentAssessments} />
-          <JudgeTestForm
+    <>
+      {/* Layer 0: 3D graph — full viewport WebGL canvas */}
+      <GraphVisualization data={graphData} assessments={agentAssessments} />
+
+      {/* Layer 1: HUD overlay
+          pointer-events: none on wrapper so mouse events pass through to graph canvas.
+          Individual panels restore pointer-events: auto. */}
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 10,
+        pointerEvents: 'none',
+      }}>
+        {/* Header — full width */}
+        <div style={{ pointerEvents: 'auto' }}>
+          <HudHeader />
+        </div>
+
+        {/* Left panel: transaction form + verdict */}
+        <div style={{
+          position: 'absolute',
+          top: 56,
+          left: 16,
+          width: 280,
+          height: `calc(100vh - 56px - ${feedOpen ? 156 : 36}px - 16px)`,
+          display: 'flex',
+          flexDirection: 'column',
+          pointerEvents: 'auto',
+          transition: 'height 0.2s ease',
+        }}>
+          <HudTestForm
             onSubmit={handleSubmit}
             isAnalyzing={isAnalyzing}
             initialValues={selectedTransaction}
           />
-          <AgentReasoningPanel
-            assessments={agentAssessments}
-            isAnalyzing={isAnalyzing}
-            verdict={verdict}
-          />
-        </div>
-        {/* Bottom row: Feed | Verdict */}
-        <div className="grid grid-cols-[1.6fr_1fr] gap-4">
-          <TransactionFeed onSelectTransaction={handleSelectTransaction} />
-          {verdict ? (
-            <VerdictCard verdict={verdict} />
-          ) : (
-            <div className="bg-card border border-border rounded-xl p-4 flex items-center justify-center">
-              <p className="text-sm text-muted-foreground">
-                Verdict will appear here after analysis
-              </p>
+          {verdict && (
+            <div style={{ flex: 1, marginTop: 8, minHeight: 0, overflowY: 'auto' }} className="hud-scroll">
+              <HudVerdict verdict={verdict} />
             </div>
           )}
         </div>
-      </main>
-    </div>
+
+        {/* Right panel: agent cards (scrollable) */}
+        <div style={{
+          position: 'absolute',
+          top: 56,
+          right: 16,
+          width: 288,
+          maxHeight: `calc(100vh - 56px - ${feedOpen ? 156 : 36}px - 16px)`,
+          overflowY: 'auto',
+          pointerEvents: 'auto',
+          transition: 'max-height 0.2s ease',
+        }}
+          className="hud-scroll"
+        >
+          <HudAgentPanel assessments={agentAssessments} isAnalyzing={isAnalyzing} />
+        </div>
+
+        {/* Bottom: transaction feed */}
+        <div style={{ pointerEvents: 'auto' }}>
+          <HudFeed
+            onSelectTransaction={setSelectedTransaction}
+            isOpen={feedOpen}
+            onToggle={() => setFeedOpen(v => !v)}
+          />
+        </div>
+      </div>
+    </>
   );
 }

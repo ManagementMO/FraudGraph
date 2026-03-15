@@ -1,6 +1,30 @@
-import type * as d3 from "d3";
+// ── Graph Types ───────────────────────────────────────────────────────────────
 
-// ── Backend Schema Mirrors ──────────────────────────────────────────
+export interface GraphNode {
+  id: string;
+  type: "card" | "merchant" | "device" | "ip" | "unknown";
+  is_fraud: boolean;
+  is_target: boolean;
+  community: number;
+  val?: number;
+  // Runtime fields added by react-force-graph-3d:
+  x?: number;
+  y?: number;
+  z?: number;
+}
+
+export interface GraphLink {
+  source: string | GraphNode;
+  target: string | GraphNode;
+  weight: number;
+}
+
+export interface GraphData {
+  nodes: GraphNode[];
+  links: GraphLink[];
+}
+
+// ── Agent / Verdict Types ─────────────────────────────────────────────────────
 
 export interface AgentAssessment {
   agent_name: string;
@@ -19,6 +43,8 @@ export interface FraudVerdict {
   processing_time_ms: number;
 }
 
+// ── Request Types ─────────────────────────────────────────────────────────────
+
 export interface AnalyzeRequest {
   transaction_id?: string;
   amount: number;
@@ -32,36 +58,14 @@ export interface AnalyzeRequest {
   device_type?: string | null;
 }
 
-// ── WebSocket Message Types ─────────────────────────────────────────
+// ── WebSocket Types ───────────────────────────────────────────────────────────
 
 export type WSMessage =
   | { type: "agent_assessment"; data: AgentAssessment }
   | { type: "final_verdict"; data: FraudVerdict }
   | { type: "error"; data: { message: string } };
 
-// ── Graph Types (D3-compatible) ─────────────────────────────────────
-
-export interface GraphNode extends d3.SimulationNodeDatum {
-  id: string;
-  type: "card" | "merchant" | "device" | "unknown";
-  is_fraud: boolean;
-  is_target: boolean;
-  community: number;
-  radius?: number;
-}
-
-export interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
-  source: string | GraphNode;
-  target: string | GraphNode;
-  weight: number;
-}
-
-export interface GraphData {
-  nodes: GraphNode[];
-  links: GraphLink[];
-}
-
-// ── Dashboard Stats ─────────────────────────────────────────────────
+// ── Dashboard Types ───────────────────────────────────────────────────────────
 
 export interface DashboardStats {
   node_count: number;
@@ -76,7 +80,7 @@ export interface DashboardStats {
   fraud_rate_pct: number | null;
 }
 
-// ── Sample Transactions ─────────────────────────────────────────────
+// ── Sample Data Types ─────────────────────────────────────────────────────────
 
 export interface SampleTransaction {
   TransactionID: string;
@@ -89,48 +93,7 @@ export interface SampleTransaction {
   [key: string]: unknown;
 }
 
-// ── Community Color Palette (for graph visualization) ───────────────
-
-export const COMMUNITY_COLORS = [
-  "#ff6b6b",  // coral red
-  "#feca57",  // gold
-  "#48dbfb",  // cyan
-  "#0abde3",  // deep teal
-  "#ff9ff3",  // pink
-  "#54a0ff",  // blue
-  "#5f27cd",  // purple
-  "#01a3a4",  // dark teal
-  "#f368e0",  // hot pink
-  "#ff6348",  // orange-red
-];
-
-// ── Color Constants ─────────────────────────────────────────────────
-
-export const NODE_COLORS = {
-  card: "#06b6d4",    // cyan-500
-  merchant: "#10b981", // emerald-500
-  device: "#71717a",   // zinc-500
-  fraud: "#ef4444",    // red-500
-  unknown: "#71717a",  // zinc-500
-} as const;
-
-export const TARGET_BORDER = "#fbbf24";
-export const FRAUD_GLOW_COLOR = "#ef4444";
-
-export const AGENT_COLORS: Record<string, string> = {
-  "Velocity Agent": "#22d3ee",    // cyan-400
-  "Geolocation Agent": "#a78bfa", // violet-400
-  "Graph Agent": "#34d399",       // emerald-400
-  "Behavioral Agent": "#fbbf24",  // amber-400
-} as const;
-
-export const VERDICT_COLORS = {
-  APPROVE: "#22c55e",
-  FLAG: "#f59e0b",
-  BLOCK: "#ef4444",
-} as const;
-
-// ── Preset Transactions ─────────────────────────────────────────────
+// ── Preset Transactions ───────────────────────────────────────────────────────
 
 export const PRESET_TRANSACTIONS: Array<{
   label: string;

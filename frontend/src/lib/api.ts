@@ -67,3 +67,10 @@ export async function analyzeTransaction(
   if (!res.ok) throw new Error(`Failed to analyze transaction: ${res.status}`);
   return res.json();
 }
+
+export function normalizeGraphData(raw: GraphData): GraphData {
+  return {
+    nodes: raw.nodes.map(n => ({ ...n, val: n.val ?? 5 })),
+    links: raw.links,
+  };
+}
