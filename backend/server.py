@@ -167,19 +167,38 @@ async def graph(
     max_nodes = min(max_nodes, 50)
 
     pipeline = app.state.pipeline
-    data = pipeline.graph.get_graph_data_for_frontend(card_id, depth=depth)
+    data = pipeline.graph.get_graph_data_for_frontend(card_id, depth=depth, communities=pipeline.communities)
 
     # Cap nodes if needed
     nodes = data["nodes"]
     if len(nodes) > max_nodes:
-        # Prioritize: is_target first, then is_fraud, then others
-        nodes.sort(key=lambda n: (n.get("is_target", False), n.get("is_fraud", False)), reverse=True)
+        # Prioritize: is_target, then merchants/devices (they hold edges), then fraud cards
+        nodes.sort(key=lambda n: (
+            n.get("is_target", False),
+            n.get("type") != "card",
+            n.get("is_fraud", False),
+        ), reverse=True)
         nodes = nodes[:max_nodes]
         kept_ids = {n["id"] for n in nodes}
         data["links"] = [link for link in data["links"] if link["source"] in kept_ids and link["target"] in kept_ids]
         data["nodes"] = nodes
 
     return data
+
+
+@app.get("/sample-card-ids")
+async def sample_card_ids(n: int = Query(default=20, ge=1)):
+    """Return unique card_id values from the training data."""
+    pipeline = app.state.pipeline
+    samples = pipeline.get_sample_transactions(n * 3)
+    seen = []
+    for txn in samples:
+        cid = txn.get("card_id")
+        if cid and cid not in seen:
+            seen.append(cid)
+            if len(seen) >= n:
+                break
+    return seen
 
 
 @app.get("/sample-transactions")

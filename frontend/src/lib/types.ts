@@ -46,6 +46,8 @@ export interface GraphNode extends d3.SimulationNodeDatum {
   type: "card" | "merchant" | "device" | "unknown";
   is_fraud: boolean;
   is_target: boolean;
+  community: number;
+  radius?: number;
 }
 
 export interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
@@ -87,18 +89,40 @@ export interface SampleTransaction {
   [key: string]: unknown;
 }
 
+// ── Community Color Palette (for graph visualization) ───────────────
+
+export const COMMUNITY_COLORS = [
+  "#ff6b6b",  // coral red
+  "#feca57",  // gold
+  "#48dbfb",  // cyan
+  "#0abde3",  // deep teal
+  "#ff9ff3",  // pink
+  "#54a0ff",  // blue
+  "#5f27cd",  // purple
+  "#01a3a4",  // dark teal
+  "#f368e0",  // hot pink
+  "#ff6348",  // orange-red
+];
+
 // ── Color Constants ─────────────────────────────────────────────────
 
 export const NODE_COLORS = {
-  card: "#3b82f6",
-  merchant: "#22c55e",
-  device: "#6b7280",
-  fraud: "#ef4444",
-  unknown: "#6b7280",
+  card: "#06b6d4",    // cyan-500
+  merchant: "#10b981", // emerald-500
+  device: "#71717a",   // zinc-500
+  fraud: "#ef4444",    // red-500
+  unknown: "#71717a",  // zinc-500
 } as const;
 
 export const TARGET_BORDER = "#fbbf24";
 export const FRAUD_GLOW_COLOR = "#ef4444";
+
+export const AGENT_COLORS: Record<string, string> = {
+  "Velocity Agent": "#22d3ee",    // cyan-400
+  "Geolocation Agent": "#a78bfa", // violet-400
+  "Graph Agent": "#34d399",       // emerald-400
+  "Behavioral Agent": "#fbbf24",  // amber-400
+} as const;
 
 export const VERDICT_COLORS = {
   APPROVE: "#22c55e",

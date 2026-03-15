@@ -1,79 +1,81 @@
 @import "tailwindcss";
-
-@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
-@custom-variant cyberpunk (&:where([data-theme=cyberpunk], [data-theme=cyberpunk] *));
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 @theme inline {
-  --color-bg-primary: var(--bg-primary);
-  --color-bg-secondary: var(--bg-secondary);
-  --color-text-primary: var(--text-primary);
-  --color-text-secondary: var(--text-secondary);
+  --font-sans: var(--font-sora);
+  --font-mono: var(--font-jetbrains-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
-  --color-border: var(--border-color);
-  --color-card-bg: var(--card-bg);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-danger: var(--danger);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 @layer base {
-  /* Dark theme (default) */
-  :root,
-  [data-theme="dark"] {
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --accent: #60a5fa;
-    --border-color: #334155;
-    --card-bg: #1e293b;
-    --success: #22c55e;
-    --warning: #f59e0b;
-    --danger: #ef4444;
+  :root {
+    /* deep navy-black cosmic palette */
+    --background: oklch(0.13 0.02 270);      /* deep navy-black ~#0a0a1a */
+    --foreground: oklch(0.93 0.01 270);      /* cool white */
+    --card: oklch(0.17 0.02 270);            /* navy-900 ~#121228 */
+    --card-foreground: oklch(0.93 0.01 270);
+    --popover: oklch(0.17 0.02 270);
+    --popover-foreground: oklch(0.93 0.01 270);
+    --primary: oklch(0.65 0.20 230);         /* bright cyan-blue */
+    --primary-foreground: oklch(0.98 0 0);
+    --secondary: oklch(0.22 0.02 270);       /* navy-800 ~#1a1a3a */
+    --secondary-foreground: oklch(0.93 0.01 270);
+    --muted: oklch(0.22 0.02 270);
+    --muted-foreground: oklch(0.55 0.02 270); /* cool gray */
+    --accent: oklch(0.22 0.02 270);
+    --accent-foreground: oklch(0.93 0.01 270);
+    --destructive: oklch(0.60 0.24 25);      /* red-500 */
+    --border: oklch(0.22 0.03 270);          /* navy-800 border */
+    --input: oklch(0.22 0.02 270);
+    --ring: oklch(0.65 0.20 230);            /* cyan-blue focus */
+    --chart-1: oklch(0.72 0.18 215);         /* cyan */
+    --chart-2: oklch(0.70 0.17 162);         /* emerald */
+    --chart-3: oklch(0.72 0.14 291);         /* violet */
+    --chart-4: oklch(0.83 0.19 84);          /* amber */
+    --chart-5: oklch(0.55 0.02 270);         /* cool gray */
+    --radius: 0.75rem;
   }
 
-  /* Light theme */
-  [data-theme="light"] {
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8fafc;
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --accent: #3b82f6;
-    --border-color: #e2e8f0;
-    --card-bg: #ffffff;
-    --success: #16a34a;
-    --warning: #d97706;
-    --danger: #dc2626;
+  * {
+    @apply border-border outline-ring/50;
   }
 
-  /* Cyberpunk theme */
-  [data-theme="cyberpunk"] {
-    --bg-primary: #0a0a0a;
-    --bg-secondary: #111111;
-    --text-primary: #00ff88;
-    --text-secondary: #00ccaa;
-    --accent: #00ffff;
-    --border-color: #1a3a2a;
-    --card-bg: #0d1a14;
-    --success: #00ff88;
-    --warning: #ffff00;
-    --danger: #ff0044;
+  body {
+    @apply bg-background text-foreground antialiased;
   }
 }
 
-body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: var(--font-geist-sans), sans-serif;
-}
-
-/* Agent terminal utilities */
-.terminal-text {
-  font-family: var(--font-geist-mono), monospace;
-}
-
+/* Typing cursor animation */
 .typing-cursor::after {
   content: "\2588";
   animation: blink 1s step-end infinite;
@@ -86,5 +88,18 @@ body {
   }
   50% {
     opacity: 0;
+  }
+}
+
+/* Pulse animation for target nodes */
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(251, 191, 36, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0);
   }
 }

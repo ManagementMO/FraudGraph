@@ -46,6 +46,16 @@ export async function fetchSampleTransactions(
   return res.json();
 }
 
+export function getWebSocketUrl(): string {
+  return WS_URL;
+}
+
+export async function fetchSampleCardIds(n: number = 20): Promise<string[]> {
+  const res = await fetch(`${API_BASE}/sample-card-ids?n=${n}`);
+  if (!res.ok) throw new Error(`Failed to fetch sample card IDs: ${res.status}`);
+  return res.json();
+}
+
 export async function analyzeTransaction(
   req: AnalyzeRequest
 ): Promise<FraudVerdict> {

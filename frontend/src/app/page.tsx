@@ -1,15 +1,13 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { Header } from "@/components/Header";
-import { VerdictBanner } from "@/components/VerdictBanner";
+import { HeaderBar } from "@/components/HeaderBar";
 import { JudgeTestForm } from "@/components/JudgeTestForm";
-import { AgentReasoningPanel } from "@/components/AgentReasoningPanel";
+import { AgentReasoningPanel, VerdictCard } from "@/components/AgentReasoningPanel";
 import { GraphVisualization } from "@/components/GraphVisualization";
-import { StatsBar } from "@/components/StatsBar";
+import { TransactionFeed } from "@/components/TransactionFeed";
 import { useWebSocket } from "@/hooks/useWebSocket";
-import { fetchGraph } from "@/lib/api";
-import { WS_URL } from "@/lib/api";
+import { fetchGraph, WS_URL } from "@/lib/api";
 import type {
   AgentAssessment,
   FraudVerdict,
@@ -24,11 +22,10 @@ export default function Dashboard() {
   const [verdict, setVerdict] = useState<FraudVerdict | null>(null);
   const [graphData, setGraphData] = useState<GraphData | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [currentTransaction, setCurrentTransaction] =
-    useState<AnalyzeRequest | null>(null);
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<Partial<AnalyzeRequest> | undefined>(undefined);
 
-  const { connect, send, disconnect, isConnected, onMessageRef } =
-    useWebSocket(WS_URL);
+  const { connect, send, isConnected, onMessageRef } = useWebSocket(WS_URL);
 
   // Wire up WebSocket message handler (avoids stale closures via ref)
   useEffect(() => {
@@ -56,7 +53,6 @@ export default function Dashboard() {
       setVerdict(null);
       setGraphData(null);
       setIsAnalyzing(true);
-      setCurrentTransaction(transaction);
 
       // Connect WebSocket and fetch graph in parallel
       try {
@@ -80,30 +76,43 @@ export default function Dashboard() {
     [isConnected, connect, send]
   );
 
-  // Suppress unused variable warnings for currentTransaction and disconnect
-  void currentTransaction;
-  void disconnect;
+  const handleSelectTransaction = useCallback(
+    (values: Partial<AnalyzeRequest>) => {
+      setSelectedTransaction(values);
+    },
+    []
+  );
 
   return (
-    <div className="flex flex-col h-screen bg-bg-primary">
-      <Header />
-      <VerdictBanner verdict={verdict} isAnalyzing={isAnalyzing} />
-      <main className="flex-1 grid grid-cols-[1fr_1.5fr] gap-4 p-4 min-h-0">
-        {/* Left column */}
-        <div className="flex flex-col gap-4 min-h-0">
-          <JudgeTestForm onSubmit={handleSubmit} isAnalyzing={isAnalyzing} />
+    <div className="flex flex-col h-screen bg-background">
+      <HeaderBar />
+      <main className="flex-1 grid grid-rows-[1fr_auto] gap-4 p-6 min-h-0">
+        {/* Top row: Graph | Form | Agents */}
+        <div className="grid grid-cols-[1.4fr_0.8fr_1fr] gap-4 min-h-0">
+          <GraphVisualization data={graphData} assessments={agentAssessments} />
+          <JudgeTestForm
+            onSubmit={handleSubmit}
+            isAnalyzing={isAnalyzing}
+            initialValues={selectedTransaction}
+          />
           <AgentReasoningPanel
             assessments={agentAssessments}
             isAnalyzing={isAnalyzing}
+            verdict={verdict}
           />
         </div>
-        {/* Right column (larger - hero graph) */}
-        <div className="flex flex-col gap-4 min-h-0">
-          <GraphVisualization
-            data={graphData}
-            assessments={agentAssessments}
-          />
-          <StatsBar />
+        {/* Bottom row: Feed | Verdict */}
+        <div className="grid grid-cols-[1.6fr_1fr] gap-4">
+          <TransactionFeed onSelectTransaction={handleSelectTransaction} />
+          {verdict ? (
+            <VerdictCard verdict={verdict} />
+          ) : (
+            <div className="bg-card border border-border rounded-xl p-4 flex items-center justify-center">
+              <p className="text-sm text-muted-foreground">
+                Verdict will appear here after analysis
+              </p>
+            </div>
+          )}
         </div>
       </main>
     </div>

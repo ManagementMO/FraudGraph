@@ -1,20 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import type { AgentAssessment } from "@/lib/types";
+import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { AgentAssessment, FraudVerdict } from "@/lib/types";
+import { AGENT_COLORS, VERDICT_COLORS } from "@/lib/types";
 
 interface AgentReasoningPanelProps {
   assessments: AgentAssessment[];
   isAnalyzing: boolean;
+  verdict: FraudVerdict | null;
 }
-
-/** Map agent names to colors for the consensus mini-bar */
-const AGENT_COLORS = [
-  "#60a5fa", // blue
-  "#a78bfa", // purple
-  "#f472b6", // pink
-  "#34d399", // emerald
-];
 
 function getScoreColor(score: number): string {
   if (score <= 30) return "#22c55e";
@@ -22,36 +19,53 @@ function getScoreColor(score: number): string {
   return "#ef4444";
 }
 
-function AgentCard({ assessment, index }: { assessment: AgentAssessment; index: number }) {
+function getAgentColor(name: string): string {
+  return AGENT_COLORS[name] ?? "#71717a";
+}
+
+function AgentCard({
+  assessment,
+  index,
+}: {
+  assessment: AgentAssessment;
+  index: number;
+}) {
   const [expanded, setExpanded] = useState(false);
+  const color = getAgentColor(assessment.agent_name);
 
   return (
-    <div
-      className="border border-border rounded-md p-3 mb-3 bg-bg-primary/50"
-      style={{ animationDelay: `${index * 100}ms` }}
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.15, duration: 0.3 }}
+      className="border border-border rounded-lg p-3 bg-background/50"
     >
-      {/* Agent name header */}
+      {/* Agent header */}
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-accent font-bold font-mono text-sm">
-          {">"} {assessment.agent_name}
+        <span
+          className="w-2 h-2 rounded-full shrink-0"
+          style={{ backgroundColor: color }}
+        />
+        <span className="text-sm font-medium text-foreground/80">
+          {assessment.agent_name}
         </span>
-        <span className="ml-auto text-xs px-2 py-0.5 rounded-full border border-border text-text-secondary">
-          {(assessment.confidence * 100).toFixed(0)}% confident
+        <span className="ml-auto text-xs font-mono text-muted-foreground tabular-nums">
+          {(assessment.confidence * 100).toFixed(0)}%
         </span>
       </div>
 
       {/* Risk score bar */}
       <div className="flex items-center gap-2 mb-2">
-        <div className="bg-bg-primary rounded-full h-2.5 w-full flex-1">
-          <div
-            className="h-2.5 rounded-full transition-all duration-700 ease-out"
-            style={{
-              width: `${assessment.risk_score}%`,
-              backgroundColor: getScoreColor(assessment.risk_score),
-            }}
+        <div className="bg-secondary rounded-full h-1.5 w-full flex-1">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${assessment.risk_score}%` }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="h-1.5 rounded-full"
+            style={{ backgroundColor: getScoreColor(assessment.risk_score) }}
           />
         </div>
-        <span className="text-xs text-text-secondary font-mono whitespace-nowrap">
+        <span className="text-xs text-muted-foreground font-mono whitespace-nowrap tabular-nums">
           {assessment.risk_score}/100
         </span>
       </div>
@@ -60,12 +74,13 @@ function AgentCard({ assessment, index }: { assessment: AgentAssessment; index: 
       {assessment.signals.length > 0 && (
         <div className="flex flex-wrap gap-1 mb-2">
           {assessment.signals.map((signal, i) => (
-            <span
+            <Badge
               key={i}
-              className="text-xs font-mono text-text-secondary bg-bg-primary px-1.5 py-0.5 rounded border border-border"
+              variant="secondary"
+              className="text-[10px] font-mono bg-secondary text-muted-foreground border-border hover:bg-secondary"
             >
               {signal}
-            </span>
+            </Badge>
           ))}
         </div>
       )}
@@ -74,7 +89,7 @@ function AgentCard({ assessment, index }: { assessment: AgentAssessment; index: 
       {assessment.explanation && (
         <div>
           <p
-            className={`text-xs text-text-secondary font-mono ${
+            className={`text-xs text-muted-foreground leading-relaxed ${
               !expanded ? "line-clamp-2" : ""
             }`}
           >
@@ -84,67 +99,68 @@ function AgentCard({ assessment, index }: { assessment: AgentAssessment; index: 
             <button
               type="button"
               onClick={() => setExpanded(!expanded)}
-              className="text-xs text-accent hover:underline mt-0.5"
+              className="text-xs text-primary hover:text-primary/80 mt-0.5"
             >
               {expanded ? "Show less" : "Show more"}
             </button>
           )}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 
-function ConsensusBar({ assessments }: { assessments: AgentAssessment[] }) {
-  if (assessments.length < 2) return null;
-
-  const scores = assessments.map((a) => a.risk_score);
-  const maxScore = Math.max(...scores);
-  const minScore = Math.min(...scores);
-  const spread = maxScore - minScore;
+export function VerdictCard({ verdict }: { verdict: FraudVerdict }) {
+  const borderColor = VERDICT_COLORS[verdict.verdict];
 
   return (
-    <div className="mt-3 pt-3 border-t border-border">
-      {/* Disagreement warning */}
-      {spread > 30 && (
-        <div className="text-warning bg-warning/10 border border-warning/30 rounded px-3 py-1.5 text-xs font-medium mb-2">
-          Agents Disagree (spread: {spread.toFixed(0)} pts)
-        </div>
-      )}
+    <motion.div
+      initial={{ scale: 0.95, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="bg-card border border-border rounded-xl p-4 flex flex-col"
+    >
+      <h2 className="text-xs uppercase tracking-wider text-muted-foreground mb-3">
+        Verdict
+      </h2>
+      <div className="flex-1 flex flex-col items-center justify-center">
+        <span
+          className="text-5xl font-bold font-mono tracking-wider mb-4"
+          style={{
+            color: borderColor,
+            textShadow: `0 0 20px ${borderColor}40`,
+          }}
+        >
+          {verdict.verdict}
+        </span>
+      </div>
+      <p className="text-xs text-muted-foreground leading-relaxed mb-2">
+        {verdict.explanation}
+      </p>
+      <span className="text-[10px] font-mono text-muted-foreground/50 tabular-nums">
+        Score: {verdict.final_score}/100 &middot; {verdict.processing_time_ms}ms
+      </span>
+    </motion.div>
+  );
+}
 
-      {/* Mini summary bar */}
-      <div className="text-xs text-text-secondary mb-1 font-medium">
-        Score Distribution
-      </div>
-      <div className="relative bg-bg-primary rounded-full h-3 w-full border border-border">
-        {assessments.map((a, i) => (
-          <div
-            key={a.agent_name}
-            className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border border-bg-primary"
-            style={{
-              left: `calc(${a.risk_score}% - 5px)`,
-              backgroundColor: AGENT_COLORS[i % AGENT_COLORS.length],
-            }}
-            title={`${a.agent_name}: ${a.risk_score}`}
-          />
-        ))}
-      </div>
-      {/* Legend */}
-      <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5">
-        {assessments.map((a, i) => (
-          <div key={a.agent_name} className="flex items-center gap-1">
-            <span
-              className="w-2 h-2 rounded-full inline-block"
-              style={{
-                backgroundColor: AGENT_COLORS[i % AGENT_COLORS.length],
-              }}
-            />
-            <span className="text-xs text-text-secondary font-mono">
-              {a.agent_name.replace(" Agent", "")}
-            </span>
+function SkeletonCards() {
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="border border-border rounded-lg p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <Skeleton className="w-2 h-2 rounded-full" />
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-3 w-8 ml-auto" />
           </div>
-        ))}
-      </div>
+          <Skeleton className="h-1.5 w-full rounded-full mb-2" />
+          <div className="flex gap-1">
+            <Skeleton className="h-4 w-16 rounded" />
+            <Skeleton className="h-4 w-20 rounded" />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -152,50 +168,52 @@ function ConsensusBar({ assessments }: { assessments: AgentAssessment[] }) {
 export function AgentReasoningPanel({
   assessments,
   isAnalyzing,
+  verdict,
 }: AgentReasoningPanelProps) {
   return (
-    <div className="bg-card-bg border border-border rounded-lg p-4 flex-1 min-h-0 overflow-y-auto">
+    <div className="bg-card border border-border rounded-xl p-4 flex-1 min-h-0 overflow-y-auto">
       {/* Title */}
       <div className="flex items-center gap-2 mb-3">
-        <h2 className="text-sm font-semibold text-text-primary">
-          Agent Analysis
+        <h2 className="text-xs uppercase tracking-wider text-muted-foreground">
+          Agent analysis
         </h2>
         {isAnalyzing && (
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
           </span>
         )}
       </div>
 
-      {/* Waiting state */}
-      {isAnalyzing && assessments.length === 0 && (
-        <div className="text-sm text-text-secondary font-mono">
-          <span className="typing-cursor">Waiting for agents...</span>
-        </div>
-      )}
+      {/* Waiting skeleton state */}
+      {isAnalyzing && assessments.length === 0 && <SkeletonCards />}
 
       {/* No analysis yet */}
-      {!isAnalyzing && assessments.length === 0 && (
-        <div className="text-sm text-text-secondary">
+      {!isAnalyzing && assessments.length === 0 && !verdict && (
+        <div className="text-sm text-muted-foreground">
           Submit a transaction to see agent reasoning
         </div>
       )}
 
       {/* Agent assessment cards */}
-      {assessments.map((assessment, index) => (
-        <AgentCard key={assessment.agent_name} assessment={assessment} index={index} />
-      ))}
+      <AnimatePresence>
+        <div className="grid grid-cols-2 gap-2">
+          {assessments.map((assessment, index) => (
+            <AgentCard
+              key={assessment.agent_name}
+              assessment={assessment}
+              index={index}
+            />
+          ))}
+        </div>
+      </AnimatePresence>
 
       {/* Analyzing indicator after cards */}
-      {isAnalyzing && assessments.length > 0 && (
-        <div className="text-xs text-text-secondary font-mono mt-1">
+      {isAnalyzing && assessments.length > 0 && assessments.length < 4 && (
+        <div className="text-xs text-muted-foreground font-mono mt-2">
           <span className="typing-cursor">Waiting for more agents...</span>
         </div>
       )}
-
-      {/* Consensus / Disagreement Visualization */}
-      <ConsensusBar assessments={assessments} />
     </div>
   );
 }

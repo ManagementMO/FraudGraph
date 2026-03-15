@@ -159,7 +159,7 @@ class TransactionGraph:
             "details": "; ".join(details) if details else "No fraud connections detected",
         }
 
-    def get_graph_data_for_frontend(self, card_id: str, depth: int = 2) -> dict:
+    def get_graph_data_for_frontend(self, card_id: str, depth: int = 2, communities: dict = None) -> dict:
         """Export subgraph around a card as JSON for D3.js visualization."""
         if card_id not in self.G:
             return {"nodes": [], "links": []}
@@ -186,6 +186,7 @@ class TransactionGraph:
                 "type": nd.get("type", "unknown"),
                 "is_fraud": is_fraud,
                 "is_target": node == card_id,
+                "community": communities.get(node, 0) if communities else 0,
             })
 
         link_list = []
