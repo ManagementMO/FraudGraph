@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Backend Pipeline** - Data loading, graph construction, all 5 agents, and Gemini-powered explanations
 - [x] **Phase 2: API Layer** - FastAPI REST endpoints and WebSocket streaming connecting agents to frontend (completed 2026-03-14)
 - [x] **Phase 3: Frontend Dashboard** - Next.js dashboard with D3.js graph, agent reasoning panel, and judge interaction (completed 2026-03-15)
-- [ ] **Phase 4: Demo Preparation** - Fraud ring scenarios, batch evaluation metrics, and Gemini caching for reliable demo
+- [x] **Phase 4: Demo Preparation** - Fraud ring scenarios, batch evaluation metrics, and Gemini caching for reliable demo (completed 2026-03-15)
 
 ## Phase Details
 
@@ -92,4 +92,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Backend Pipeline | 3/3 | Complete    | 2026-03-14 |
 | 2. API Layer | 2/2 | Complete    | 2026-03-14 |
 | 3. Frontend Dashboard | 3/3 | Complete    | 2026-03-15 |
-| 4. Demo Preparation | 1/2 | In Progress | - |
+| 4. Demo Preparation | 1/2 | Complete    | 2026-03-15 |

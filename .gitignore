@@ -1,6 +1,14 @@
+.env
+backend/.env
 .planning/
 data/
 !backend/data/
 planning/
 .claude/
 .claude/settings.local.json
+backend/__pycache__/
+tests/__pycache__/
+backend/data/__pycache__/
+backend/agents/__pycache__/
+backend/models/__pycache__/
+backend/demo/__pycache__/

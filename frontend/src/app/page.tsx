@@ -58,24 +58,24 @@ export default function Dashboard() {
       setIsAnalyzing(true);
       setCurrentTransaction(transaction);
 
-      // Connect WebSocket if not already connected
-      if (!isConnected) {
-        connect();
-      }
-
-      // Fetch graph data in parallel
+      // Connect WebSocket and fetch graph in parallel
       try {
-        const graph = await fetchGraph(transaction.card_id);
-        setGraphData(graph);
+        const [graph] = await Promise.all([
+          fetchGraph(transaction.card_id).catch((err) => {
+            console.error("Failed to fetch graph:", err);
+            return null;
+          }),
+          isConnected ? Promise.resolve() : connect(),
+        ]);
+        if (graph) setGraphData(graph);
       } catch (err) {
-        console.error("Failed to fetch graph:", err);
+        console.error("WebSocket connection failed:", err);
+        setIsAnalyzing(false);
+        return;
       }
 
-      // Send transaction for analysis via WebSocket
-      // Small delay to ensure WebSocket is connected after connect() call
-      setTimeout(() => {
-        send(transaction);
-      }, 100);
+      // WebSocket is guaranteed open now — send transaction
+      send(transaction);
     },
     [isConnected, connect, send]
   );

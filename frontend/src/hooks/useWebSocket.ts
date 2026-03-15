@@ -8,17 +8,25 @@ export function useWebSocket(url: string) {
   const [isConnected, setIsConnected] = useState(false);
   const onMessageRef = useRef<((msg: WSMessage) => void) | undefined>(undefined);
 
-  const connect = useCallback(() => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) return;
-    const ws = new WebSocket(url);
-    ws.onopen = () => setIsConnected(true);
-    ws.onclose = () => setIsConnected(false);
-    ws.onerror = () => ws.close();
-    ws.onmessage = (event) => {
-      const msg = JSON.parse(event.data) as WSMessage;
-      onMessageRef.current?.(msg);
-    };
-    wsRef.current = ws;
+  const connect = useCallback((): Promise<void> => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const ws = new WebSocket(url);
+      ws.onopen = () => {
+        setIsConnected(true);
+        resolve();
+      };
+      ws.onclose = () => setIsConnected(false);
+      ws.onerror = () => {
+        ws.close();
+        reject(new Error("WebSocket connection failed"));
+      };
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data) as WSMessage;
+        onMessageRef.current?.(msg);
+      };
+      wsRef.current = ws;
+    });
   }, [url]);
 
   const send = useCallback((data: object) => {
